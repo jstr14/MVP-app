@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">MVP</string>
+
+    <!-- Auth Feature Strings (English - Default) -->
+    <string name="login_welcome_title">Welcome to MVP!</string>
+    <string name="login_welcome_subtitle">Sign in quickly and securely with your Google account.</string>
+    <string name="login_google_btn_text">Sign in with Google</string>
+    <string name="login_google_btn_accessibility">Google Sign-In Button</string>
 </resources>
