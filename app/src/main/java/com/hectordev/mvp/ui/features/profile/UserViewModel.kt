@@ -1,4 +1,4 @@
-package com.hectordev.mvp.ui.user
+package com.hectordev.mvp.ui.features.profile
 
 import android.util.Log
 import androidx.lifecycle.ViewModel

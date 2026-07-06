@@ -1,4 +1,4 @@
-package com.hectordev.mvp.ui.screens
+package com.hectordev.mvp.ui.features.auth
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize

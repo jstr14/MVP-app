@@ -1,4 +1,4 @@
-package com.hectordev.mvp.ui.theme
+package com.hectordev.mvp.ui.core.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle

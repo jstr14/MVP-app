@@ -1,6 +1,8 @@
 package com.hectordev.mvp.di
 
-import com.hectordev.mvp.data.repository.UserRepositoryImpl
+import com.hectordev.mvp.data.repository.AuthRepositoryDefault
+import com.hectordev.mvp.data.repository.UserRepositoryDefault
+import com.hectordev.mvp.domain.repository.AuthRepository
 import com.hectordev.mvp.domain.repository.UserRepository
 import dagger.Binds
 import dagger.Module
@@ -15,6 +17,12 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindUserRepository(
-        userRepositoryImpl: UserRepositoryImpl
+        userRepositoryDefault: UserRepositoryDefault
     ): UserRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindAuthRepository(
+        authRepositoryDefault: AuthRepositoryDefault
+    ): AuthRepository
 }
