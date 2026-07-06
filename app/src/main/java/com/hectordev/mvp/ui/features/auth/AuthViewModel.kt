@@ -1,7 +1,6 @@
 package com.hectordev.mvp.ui.features.auth
 
 import android.content.Context
-import android.util.Log
 import androidx.credentials.CredentialManager
 import androidx.credentials.CustomCredential
 import androidx.credentials.GetCredentialRequest
@@ -14,7 +13,6 @@ import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.firebase.auth.GoogleAuthProvider
 import com.hectordev.mvp.BuildConfig
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -24,9 +22,7 @@ import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
 @HiltViewModel
-class AuthViewModel @Inject constructor(
-    @ApplicationContext private val context: Context
-) : ViewModel() {
+class AuthViewModel @Inject constructor() : ViewModel() {
 
     // Firebase Auth instance reference
     private val firebaseAuth = FirebaseAuth.getInstance()
@@ -39,8 +35,6 @@ class AuthViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(AuthUiState())
     val uiState: StateFlow<AuthUiState> = _uiState.asStateFlow()
 
-    private val credentialManager = CredentialManager.create(context)
-
     /**
      * Triggers the modern Google Sign-In sheet using the Credential Manager API
      * and authenticates the token securely with Firebase.
@@ -52,7 +46,6 @@ class AuthViewModel @Inject constructor(
 
             try {
                 val serverClientId = BuildConfig.FIREBASE_WEB_CLIENT_ID
-                Log.d("AUTH_DEBUG", "1. Server Client ID loaded: $serverClientId")
 
                 if (serverClientId.isEmpty()) {
                     _uiState.update {
@@ -72,15 +65,15 @@ class AuthViewModel @Inject constructor(
                     .addCredentialOption(googleIdOption)
                     .build()
 
-                Log.d("AUTH_DEBUG", "2. Launching Credential Manager UI...")
+                // CredentialManager must be created with the Activity context so it can
+                // properly anchor and render the account picker bottom sheet.
+                val credentialManager = CredentialManager.create(activityContext)
 
                 // 1. Await system's native account picker sheet
                 val result = credentialManager.getCredential(
                     context = activityContext,
                     request = request
                 )
-
-                Log.d("AUTH_DEBUG", "3. Credential received successfully: ${result.credential.type}")
 
                 val credential = result.credential
 
@@ -113,13 +106,11 @@ class AuthViewModel @Inject constructor(
 
             } catch (e: GetCredentialException) {
                 // Catches user cancelations (swiping down the sheet), configuration errors, or API unavailabilities
-                Log.e("AUTH_DEBUG", "Catch GetCredentialException: ${e.message}", e)
                 _uiState.update {
                     it.copy(isLoading = false, errorMessage = e.localizedMessage ?: "Google Sign-In canceled or failed.")
                 }
             } catch (e: Exception) {
                 // Catches network connection drops, revoked tokens, or Firebase side exceptions gracefully
-                Log.e("AUTH_DEBUG", "Catch Generic Exception: ${e.message}", e)
                 _uiState.update {
                     it.copy(isLoading = false, errorMessage = e.localizedMessage ?: "An unexpected authentication error occurred.")
                 }
