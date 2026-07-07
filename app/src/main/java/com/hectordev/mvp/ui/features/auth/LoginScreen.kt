@@ -1,5 +1,7 @@
 package com.hectordev.mvp.ui.features.auth
 
+import android.app.Activity
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -10,13 +12,18 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.hectordev.mvp.R
 import com.hectordev.mvp.ui.core.theme.MVPTheme
 import com.hectordev.mvp.ui.features.auth.components.GoogleSignInButton
@@ -24,8 +31,27 @@ import com.hectordev.mvp.ui.features.auth.components.GoogleSignInButton
 @Composable
 fun LoginScreen(
     onLoginSuccess: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    viewModel: AuthViewModel = hiltViewModel()
 ) {
+    // Obtain the Android context from the composition local tree
+    val context = LocalContext.current
+
+    // Collect the UI state reactively from the ViewModel
+    val uiState by viewModel.uiState.collectAsState()
+
+    // Handle authentication side-effects Reactively
+    LaunchedEffect(uiState.isSuccess, uiState.errorMessage) {
+        if (uiState.isSuccess) {
+            onLoginSuccess()
+            viewModel.resetState()
+        }
+        uiState.errorMessage?.let { error ->
+            Toast.makeText(context, error, Toast.LENGTH_LONG).show()
+            viewModel.resetState()
+        }
+    }
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -53,14 +79,15 @@ fun LoginScreen(
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        // Custom feature-scoped Google Sign-In button
+        // Custom feature-scoped Google Sign-In button connected to the flow
         GoogleSignInButton(
             onClick = {
-                // TODO: Integrate Google Credential Manager logic here on the next feature branch.
-                // Simulating instant navigation success for layout testing purposes.
-                onLoginSuccess()
+                // Credential Manager requires an explicit Activity Context to draw its bottom sheet
+                (context as? Activity)?.let { activityContext ->
+                    viewModel.signInWithGoogle(activityContext)
+                }
             },
-            isLoading = false
+            isLoading = uiState.isLoading
         )
     }
 }
@@ -72,6 +99,7 @@ fun LoginScreen(
 private fun LoginScreenPreview() {
     MVPTheme {
         Surface {
+            // Static instantiation bypasses Hilt ViewModel requirements inside the preview panel
             LoginScreen(onLoginSuccess = {})
         }
     }

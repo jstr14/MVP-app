@@ -1,6 +1,5 @@
 package com.hectordev.mvp.ui.features.profile
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.hectordev.mvp.domain.User
@@ -21,13 +20,7 @@ class UserViewModel @Inject constructor(
 
     fun loadUser(userId: String) {
         viewModelScope.launch {
-            Log.d("UserViewModel", "Loading user with ID: $userId")
             val user = userRepository.getCurrentUser(userId)
-            if (user != null) {
-                Log.d("UserViewModel", "User loaded successfully: ${user.name}")
-            } else {
-                Log.d("UserViewModel", "User not found or Firestore is empty")
-            }
             _userState.value = user
         }
     }
