@@ -11,6 +11,7 @@ import androidx.navigation.compose.rememberNavController
 import com.hectordev.mvp.ui.features.auth.AuthViewModel
 import com.hectordev.mvp.ui.features.auth.LoginScreen
 import com.hectordev.mvp.ui.features.auth.SplashScreen
+import com.hectordev.mvp.ui.features.event.CreateEventScreen
 import com.hectordev.mvp.ui.features.home.HomeScreen
 
 @Composable
@@ -19,7 +20,6 @@ fun AppNavGraph(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController()
 ) {
-    // We safely read the state inside the NavGraph block
     val isUserLoggedIn by authViewModel.isUserLoggedIn.collectAsStateWithLifecycle()
 
     NavHost(
@@ -44,8 +44,38 @@ fun AppNavGraph(
             })
         }
 
-        composable<AppDestination.Home> {
-            HomeScreen()
+        composable<AppDestination.Home> { backStackEntry ->
+            val eventCreated by backStackEntry.savedStateHandle
+                .getStateFlow("event_created", false)
+                .collectAsStateWithLifecycle()
+
+            HomeScreen(
+                showEventCreatedMessage = eventCreated,
+                onEventCreatedMessageShown = {
+                    backStackEntry.savedStateHandle["event_created"] = false
+                },
+                onLogout = {
+                    authViewModel.signOut()
+                    navController.navigate(AppDestination.Login) {
+                        popUpTo(AppDestination.Home) { inclusive = true }
+                    }
+                },
+                onCreateEvent = {
+                    navController.navigate(AppDestination.CreateEvent)
+                }
+            )
+        }
+
+        composable<AppDestination.CreateEvent> {
+            CreateEventScreen(
+                onEventCreated = {
+                    navController.previousBackStackEntry
+                        ?.savedStateHandle
+                        ?.set("event_created", true)
+                    navController.popBackStack()
+                },
+                onBack = { navController.popBackStack() }
+            )
         }
     }
 }

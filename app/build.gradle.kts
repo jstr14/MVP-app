@@ -61,6 +61,7 @@ dependencies {
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.compose.material.icons.core)
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
@@ -84,7 +85,14 @@ dependencies {
 
     // Credential Manager for Google Login
     implementation(libs.credentials)
+    implementation(libs.credentials.play.services.auth)
     implementation(libs.google.id)
+
+    // Coil - async image loading
+    implementation(libs.coil.compose)
+
+    // Location
+    implementation(libs.play.services.location)
 
     // Hilt
     implementation(libs.hilt.android)

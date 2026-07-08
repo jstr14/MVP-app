@@ -13,4 +13,7 @@ sealed interface AppDestination {
 
     @Serializable
     data object Home : AppDestination
+
+    @Serializable
+    data object CreateEvent : AppDestination
 }
