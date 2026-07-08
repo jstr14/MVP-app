@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -19,14 +21,21 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -35,6 +44,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -47,6 +57,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -57,6 +68,7 @@ import coil.compose.AsyncImage
 import com.hectordev.mvp.R
 import com.hectordev.mvp.domain.Event
 import com.hectordev.mvp.domain.EventStatus
+import com.hectordev.mvp.domain.Prediction
 import com.hectordev.mvp.domain.User
 import com.hectordev.mvp.ui.core.components.EventStatusChip
 import com.hectordev.mvp.ui.core.extensions.toFormattedDate
@@ -72,7 +84,9 @@ fun EventDetailsScreen(
     EventDetailsContent(
         uiState = uiState,
         onBack = onBack,
+        onOpenPredictions = viewModel::openPredictions,
         onStartEvent = viewModel::startEvent,
+        onSubmitPrediction = viewModel::submitPrediction,
         onInvite = viewModel::inviteByEmail,
         onClearInviteState = viewModel::clearInviteState,
         onRemoveParticipant = viewModel::removeParticipant,
@@ -88,7 +102,9 @@ fun EventDetailsScreen(
 private fun EventDetailsContent(
     uiState: EventDetailsUiState,
     onBack: () -> Unit,
+    onOpenPredictions: () -> Unit,
     onStartEvent: () -> Unit,
+    onSubmitPrediction: (projectedMvpId: String, tripleParticipantId: String) -> Unit,
     onInvite: (String) -> Unit,
     onClearInviteState: () -> Unit,
     onRemoveParticipant: (String) -> Unit,
@@ -98,14 +114,23 @@ private fun EventDetailsContent(
     modifier: Modifier = Modifier
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
+    var showOpenPredictionsConfirmation by remember { mutableStateOf(false) }
     var showStartConfirmation by remember { mutableStateOf(false) }
     var showInviteDialog by remember { mutableStateOf(false) }
     var inviteEmailInput by remember { mutableStateOf("") }
+    var showPredictionSheet by remember { mutableStateOf(false) }
 
     LaunchedEffect(uiState.error) {
         uiState.error?.let {
             snackbarHostState.showSnackbar(it)
             onErrorShown()
+        }
+    }
+
+    val predictionSuccessMessage = stringResource(R.string.event_details_prediction_success)
+    LaunchedEffect(uiState.predictionSaveCount) {
+        if (uiState.predictionSaveCount > 0) {
+            snackbarHostState.showSnackbar(predictionSuccessMessage)
         }
     }
 
@@ -115,6 +140,24 @@ private fun EventDetailsContent(
             inviteEmailInput = ""
             onClearInviteState()
         }
+    }
+
+    if (showOpenPredictionsConfirmation) {
+        AlertDialog(
+            onDismissRequest = { showOpenPredictionsConfirmation = false },
+            title = { Text(stringResource(R.string.event_details_open_predictions_confirm_title)) },
+            text = { Text(stringResource(R.string.event_details_open_predictions_confirm_message)) },
+            confirmButton = {
+                Button(onClick = { onOpenPredictions(); showOpenPredictionsConfirmation = false }) {
+                    Text(stringResource(R.string.event_details_open_predictions_confirm_btn))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showOpenPredictionsConfirmation = false }) {
+                    Text(stringResource(R.string.home_cancel))
+                }
+            }
+        )
     }
 
     if (showStartConfirmation) {
@@ -186,9 +229,23 @@ private fun EventDetailsContent(
         )
     }
 
+    val predictionParticipants = uiState.participants.filter { it.id != uiState.currentUserId }
+
+    if (showPredictionSheet) {
+        PredictionBottomSheet(
+            participants = predictionParticipants,
+            myPrediction = uiState.myPrediction,
+            isSubmitting = uiState.isSubmittingPrediction,
+            saveCount = uiState.predictionSaveCount,
+            onSubmit = onSubmitPrediction,
+            onDismiss = { showPredictionSheet = false }
+        )
+    }
+
     val event = uiState.event
     val isAdmin = event?.adminId == uiState.currentUserId
-    val showStartAction = isAdmin && event?.status == EventStatus.PRE_TRIP
+    val showOpenPredictionsAction = isAdmin && event?.status == EventStatus.PRE_TRIP
+    val showStartAction = isAdmin && event?.status == EventStatus.PREDICTION
 
     Scaffold(
         modifier = modifier.statusBarsPadding(),
@@ -208,6 +265,11 @@ private fun EventDetailsContent(
                     }
                 },
                 actions = {
+                    if (showOpenPredictionsAction) {
+                        TextButton(onClick = { showOpenPredictionsConfirmation = true }) {
+                            Text(stringResource(R.string.event_details_open_predictions_btn))
+                        }
+                    }
                     if (showStartAction) {
                         TextButton(onClick = { showStartConfirmation = true }) {
                             Text(stringResource(R.string.event_details_start_event_btn))
@@ -254,6 +316,19 @@ private fun EventDetailsContent(
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
+                }
+            }
+
+            val showPrediction = loadedEvent.status == EventStatus.PREDICTION ||
+                (loadedEvent.status == EventStatus.ON_GOING && uiState.myPrediction != null)
+            if (showPrediction) {
+                item {
+                    PredictionCard(
+                        participants = predictionParticipants,
+                        myPrediction = uiState.myPrediction,
+                        isEditable = loadedEvent.status == EventStatus.PREDICTION,
+                        onOpen = { showPredictionSheet = true }
+                    )
                 }
             }
 
@@ -432,6 +507,263 @@ private fun PendingEmailRow(
     }
 }
 
+@Composable
+private fun PredictionCard(
+    participants: List<User>,
+    myPrediction: Prediction?,
+    isEditable: Boolean,
+    onOpen: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f)
+        )
+    ) {
+        Column(modifier = Modifier.padding(start = 20.dp, end = 16.dp, top = 4.dp, bottom = 16.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = stringResource(R.string.event_details_section_prediction),
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.weight(1f)
+                )
+                if (isEditable) {
+                    if (myPrediction != null) {
+                        IconButton(onClick = onOpen) {
+                            Icon(
+                                imageVector = Icons.Default.Edit,
+                                contentDescription = stringResource(R.string.event_details_prediction_update_btn),
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    } else {
+                        TextButton(onClick = onOpen) {
+                            Text(stringResource(R.string.event_details_prediction_submit_btn))
+                        }
+                    }
+                }
+            }
+            if (myPrediction != null) {
+                Spacer(modifier = Modifier.height(8.dp))
+                val mvpName = participants.find { it.id == myPrediction.projectedMvpId }?.name
+                    ?: myPrediction.projectedMvpId
+                val tripleName = participants.find { it.id == myPrediction.tripleParticipantId }?.name
+                    ?: myPrediction.tripleParticipantId
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    PredictionPickColumn(
+                        emoji = "🔮",
+                        badgeColor = MaterialTheme.colorScheme.primary,
+                        label = stringResource(R.string.event_details_prediction_mvp_label),
+                        participantName = mvpName,
+                        modifier = Modifier.weight(1f)
+                    )
+                    PredictionPickColumn(
+                        emoji = "🏀",
+                        badgeColor = MaterialTheme.colorScheme.tertiary,
+                        label = stringResource(R.string.event_details_prediction_triple_label),
+                        participantName = tripleName,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+            } else {
+                Text(
+                    text = stringResource(R.string.event_details_prediction_not_submitted),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(top = 2.dp)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun PredictionPickColumn(
+    emoji: String,
+    badgeColor: Color,
+    label: String,
+    participantName: String,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .size(32.dp)
+                .clip(CircleShape)
+                .background(badgeColor.copy(alpha = 0.12f)),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(text = emoji, style = MaterialTheme.typography.bodySmall)
+        }
+        Column(verticalArrangement = Arrangement.spacedBy(1.dp)) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Text(
+                text = participantName,
+                style = MaterialTheme.typography.bodySmall,
+                fontWeight = FontWeight.Medium
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun PredictionBottomSheet(
+    participants: List<User>,
+    myPrediction: Prediction?,
+    isSubmitting: Boolean,
+    saveCount: Int,
+    onSubmit: (projectedMvpId: String, tripleParticipantId: String) -> Unit,
+    onDismiss: () -> Unit
+) {
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val countOnOpen = remember { saveCount }
+    var selectedMvpId by remember { mutableStateOf(myPrediction?.projectedMvpId ?: "") }
+    var selectedTripleId by remember { mutableStateOf(myPrediction?.tripleParticipantId ?: "") }
+
+    LaunchedEffect(saveCount) {
+        if (saveCount > countOnOpen) {
+            sheetState.hide()
+            onDismiss()
+        }
+    }
+
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp)
+                .padding(bottom = 24.dp)
+                .navigationBarsPadding(),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Text(
+                text = stringResource(
+                    if (myPrediction != null) R.string.event_details_prediction_update_title
+                    else R.string.event_details_prediction_submit_title
+                ),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
+            )
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(
+                    text = "🔮  ${stringResource(R.string.event_details_prediction_mvp_description)}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                ParticipantDropdown(
+                    label = stringResource(R.string.event_details_prediction_mvp_label),
+                    participants = participants,
+                    selectedId = selectedMvpId,
+                    onSelected = { selectedMvpId = it }
+                )
+            }
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(
+                    text = "🏀  ${stringResource(R.string.event_details_prediction_triple_description)}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                ParticipantDropdown(
+                    label = stringResource(R.string.event_details_prediction_triple_label),
+                    participants = participants,
+                    selectedId = selectedTripleId,
+                    onSelected = { selectedTripleId = it }
+                )
+            }
+            Button(
+                onClick = { onSubmit(selectedMvpId, selectedTripleId) },
+                enabled = selectedMvpId.isNotEmpty() && selectedTripleId.isNotEmpty() && !isSubmitting,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                if (isSubmitting) {
+                    CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
+                } else {
+                    Text(stringResource(
+                        if (myPrediction != null) R.string.event_details_prediction_update_btn
+                        else R.string.event_details_prediction_submit_btn
+                    ))
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ParticipantDropdown(
+    label: String,
+    participants: List<User>,
+    selectedId: String,
+    onSelected: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    var expanded by remember { mutableStateOf(false) }
+    val selectedName = participants.find { it.id == selectedId }?.name?.substringBefore(" ") ?: ""
+
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = it },
+        modifier = modifier
+    ) {
+        OutlinedTextField(
+            value = selectedName,
+            onValueChange = {},
+            readOnly = true,
+            label = { Text(label) },
+            placeholder = { Text(stringResource(R.string.event_details_prediction_select_placeholder)) },
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+            modifier = Modifier
+                .menuAnchor()
+                .fillMaxWidth()
+        )
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            participants.forEach { user ->
+                DropdownMenuItem(
+                    text = { Text(user.name.substringBefore(" ")) },
+                    leadingIcon = {
+                        AsyncImage(
+                            model = user.photoUrl,
+                            contentDescription = user.name,
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .size(32.dp)
+                                .clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.surfaceVariant)
+                        )
+                    },
+                    onClick = { onSelected(user.id); expanded = false }
+                )
+            }
+        }
+    }
+}
+
 // --- PREVIEW DATA ---
 
 private val previewParticipants = listOf(
@@ -448,6 +780,11 @@ private val previewPendingParticipants = listOf(
 private val previewPendingEmails = listOf(
     "charlie.pace@test.com",
     "shannon.rutherford@test.com"
+)
+
+private val previewPrediction = Prediction(
+    projectedMvpId = "3",
+    tripleParticipantId = "4"
 )
 
 // --- SCREEN PREVIEWS ---
@@ -475,7 +812,44 @@ private fun EventDetailsAdminPreTripPreview() {
                     )
                 ),
                 onBack = {},
+                onOpenPredictions = {},
                 onStartEvent = {},
+                onSubmitPrediction = { _, _ -> },
+                onInvite = {},
+                onClearInviteState = {},
+                onRemoveParticipant = {},
+                onCancelInvite = {},
+                onCancelEmailInvite = {},
+                onErrorShown = {}
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true, name = "Participant — Predictions open")
+@Composable
+private fun EventDetailsPredictionPreview() {
+    MVPTheme {
+        Surface {
+            EventDetailsContent(
+                uiState = EventDetailsUiState(
+                    currentUserId = "2",
+                    isLoading = false,
+                    participants = previewParticipants,
+                    myPrediction = previewPrediction,
+                    event = Event(
+                        id = "1", title = "Summer Trip 2025",
+                        status = EventStatus.PREDICTION,
+                        startDate = 1_750_000_000_000L, endDate = 1_750_500_000_000L,
+                        locationLabel = "Beach house, Ibiza",
+                        adminId = "1",
+                        participants = previewParticipants.map { it.id }
+                    )
+                ),
+                onBack = {},
+                onOpenPredictions = {},
+                onStartEvent = {},
+                onSubmitPrediction = { _, _ -> },
                 onInvite = {},
                 onClearInviteState = {},
                 onRemoveParticipant = {},
@@ -510,7 +884,9 @@ private fun EventDetailsParticipantPreTripPreview() {
                     )
                 ),
                 onBack = {},
+                onOpenPredictions = {},
                 onStartEvent = {},
+                onSubmitPrediction = { _, _ -> },
                 onInvite = {},
                 onClearInviteState = {},
                 onRemoveParticipant = {},

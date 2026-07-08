@@ -2,6 +2,7 @@ package com.hectordev.mvp.domain.repository
 
 import com.hectordev.mvp.domain.Event
 import com.hectordev.mvp.domain.EventStatus
+import com.hectordev.mvp.domain.Prediction
 import kotlinx.coroutines.flow.Flow
 
 interface EventsRepository {
@@ -16,6 +17,9 @@ interface EventsRepository {
     suspend fun invitePendingEmail(eventId: String, email: String)
     suspend fun cancelEmailInvite(eventId: String, email: String)
     suspend fun bindPendingEmailInvite(email: String, userId: String)
+    suspend fun openPredictions(eventId: String)
+    suspend fun submitPrediction(eventId: String, userId: String, prediction: Prediction)
+    suspend fun getPrediction(eventId: String, userId: String): Prediction?
     suspend fun acceptInvitation(eventId: String, userId: String)
     suspend fun declineInvitation(eventId: String, userId: String)
     fun observeEvent(eventId: String): Flow<Event?>

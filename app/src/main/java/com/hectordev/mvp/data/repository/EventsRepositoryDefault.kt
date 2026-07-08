@@ -5,8 +5,10 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.hectordev.mvp.data.mapper.toDomain
 import com.hectordev.mvp.data.mapper.toDto
 import com.hectordev.mvp.data.model.EventDto
+import com.hectordev.mvp.data.model.PredictionDto
 import com.hectordev.mvp.domain.Event
 import com.hectordev.mvp.domain.EventStatus
+import com.hectordev.mvp.domain.Prediction
 import com.hectordev.mvp.domain.repository.EventsRepository
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -84,6 +86,33 @@ class EventsRepositoryDefault @Inject constructor(
                 "pendingParticipants", FieldValue.arrayUnion(userId)
             ).await()
         }
+    }
+
+    override suspend fun submitPrediction(eventId: String, userId: String, prediction: Prediction) {
+        eventsCollection.document(eventId)
+            .collection("predictions")
+            .document(userId)
+            .set(prediction.toDto())
+            .await()
+    }
+
+    override suspend fun getPrediction(eventId: String, userId: String): Prediction? {
+        return eventsCollection.document(eventId)
+            .collection("predictions")
+            .document(userId)
+            .get()
+            .await()
+            .toObject(PredictionDto::class.java)
+            ?.toDomain()
+    }
+
+    override suspend fun openPredictions(eventId: String) {
+        eventsCollection.document(eventId)
+            .update(
+                "status", EventStatus.PREDICTION.name,
+                "pendingParticipants", emptyList<String>(),
+                "pendingEmails", emptyList<String>()
+            ).await()
     }
 
     override suspend fun acceptInvitation(eventId: String, userId: String) {

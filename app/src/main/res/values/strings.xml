@@ -21,6 +21,7 @@
     <string name="home_section_past_events">Past Events</string>
     <string name="home_no_active_event">No active event. Tap + to create one.</string>
     <string name="home_status_pre_trip">Planning</string>
+    <string name="home_status_prediction">Predictions</string>
     <string name="home_status_on_going">Live</string>
     <plurals name="home_event_participants">
         <item quantity="one">%d participant</item>
@@ -40,6 +41,10 @@
     <!-- Event Details Feature Strings -->
     <string name="event_details_section_participants">Participants</string>
     <string name="event_details_admin_badge">Admin</string>
+    <string name="event_details_open_predictions_btn">Open Predictions</string>
+    <string name="event_details_open_predictions_confirm_title">Open predictions?</string>
+    <string name="event_details_open_predictions_confirm_message">Pending invitations will be cancelled and the participant pool will be locked. All confirmed participants will be able to submit their picks.</string>
+    <string name="event_details_open_predictions_confirm_btn">Open</string>
     <string name="event_details_start_event_btn">Start Event</string>
     <string name="event_details_start_confirm_title">Start event?</string>
     <string name="event_details_start_confirm_message">Predictions will be frozen and the event will go live. This cannot be undone.</string>
@@ -55,6 +60,20 @@
     <string name="event_details_section_pending">Pending Invitations</string>
     <string name="event_details_pending_badge">Pending</string>
     <string name="event_details_remove_participant">Remove participant</string>
+    <string name="event_details_section_prediction">Your Prediction</string>
+    <string name="event_details_prediction_not_submitted">Tap to submit your predictions</string>
+    <string name="event_details_prediction_submit_title">Submit your prediction</string>
+    <string name="event_details_prediction_update_title">Update your prediction</string>
+    <string name="event_details_prediction_mvp_label">MVP</string>
+    <string name="event_details_prediction_mvp_description">Who do you think will be crowned MVP?</string>
+    <string name="event_details_prediction_triple_label">Triple</string>
+    <string name="event_details_prediction_triple_description">Your wildcard bet</string>
+    <string name="event_details_prediction_select_placeholder">Select a participant</string>
+    <string name="event_details_prediction_submit_btn">Submit Prediction</string>
+    <string name="event_details_prediction_update_btn">Update Prediction</string>
+    <string name="event_details_prediction_mvp_pick">MVP: %s</string>
+    <string name="event_details_prediction_triple_pick">Triple: %s</string>
+    <string name="event_details_prediction_success">Prediction saved successfully!</string>
 
     <!-- Create Event Feature Strings -->
     <string name="create_event_screen_title">Create Event</string>

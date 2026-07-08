@@ -18,6 +18,10 @@
     <!-- Event Details Feature Strings -->
     <string name="event_details_section_participants">Participantes</string>
     <string name="event_details_admin_badge">Admin</string>
+    <string name="event_details_open_predictions_btn">Abrir predicciones</string>
+    <string name="event_details_open_predictions_confirm_title">¿Abrir predicciones?</string>
+    <string name="event_details_open_predictions_confirm_message">Las invitaciones pendientes serán canceladas y el grupo quedará cerrado. Todos los participantes confirmados podrán enviar sus predicciones.</string>
+    <string name="event_details_open_predictions_confirm_btn">Abrir</string>
     <string name="event_details_start_event_btn">Iniciar evento</string>
     <string name="event_details_start_confirm_title">¿Iniciar evento?</string>
     <string name="event_details_start_confirm_message">Las predicciones quedarán bloqueadas y el evento se pondrá en marcha. Esta acción no se puede deshacer.</string>
@@ -33,11 +37,26 @@
     <string name="event_details_section_pending">Invitaciones pendientes</string>
     <string name="event_details_pending_badge">Pendiente</string>
     <string name="event_details_remove_participant">Eliminar participante</string>
+    <string name="event_details_section_prediction">Tu predicción</string>
+    <string name="event_details_prediction_not_submitted">Toca para enviar tus predicciones</string>
+    <string name="event_details_prediction_submit_title">Envía tu predicción</string>
+    <string name="event_details_prediction_update_title">Actualiza tu predicción</string>
+    <string name="event_details_prediction_mvp_label">MVP</string>
+    <string name="event_details_prediction_mvp_description">¿Quién crees que ganará el título de MVP?</string>
+    <string name="event_details_prediction_triple_label">Triple</string>
+    <string name="event_details_prediction_triple_description">Tu apuesta loca</string>
+    <string name="event_details_prediction_select_placeholder">Selecciona un participante</string>
+    <string name="event_details_prediction_submit_btn">Enviar predicción</string>
+    <string name="event_details_prediction_update_btn">Actualizar predicción</string>
+    <string name="event_details_prediction_mvp_pick">MVP: %s</string>
+    <string name="event_details_prediction_triple_pick">Triple: %s</string>
+    <string name="event_details_prediction_success">¡Predicción guardada correctamente!</string>
 
     <string name="home_section_active_event">Evento activo</string>
     <string name="home_section_past_events">Eventos pasados</string>
     <string name="home_no_active_event">Sin evento activo. Toca + para crear uno.</string>
     <string name="home_status_pre_trip">Planificación</string>
+    <string name="home_status_prediction">Predicciones</string>
     <string name="home_status_on_going">En directo</string>
     <plurals name="home_event_participants">
         <item quantity="one">%d participante</item>

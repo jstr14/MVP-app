@@ -18,11 +18,13 @@ import com.hectordev.mvp.ui.core.theme.MVPTheme
 fun EventStatusChip(status: EventStatus, modifier: Modifier = Modifier) {
     val label = when (status) {
         EventStatus.PRE_TRIP -> stringResource(R.string.home_status_pre_trip)
+        EventStatus.PREDICTION -> stringResource(R.string.home_status_prediction)
         EventStatus.ON_GOING -> stringResource(R.string.home_status_on_going)
         else -> return
     }
     val color = when (status) {
         EventStatus.ON_GOING -> MaterialTheme.colorScheme.primary
+        EventStatus.PREDICTION -> MaterialTheme.colorScheme.tertiary
         else -> MaterialTheme.colorScheme.secondary
     }
     Surface(

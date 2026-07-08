@@ -55,8 +55,9 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 eventsRepository.observeParticipantEvents(currentUserId).collect { events ->
-                    // Active: prefer ON_GOING, fall back to earliest PRE_TRIP
+                    // Active: ON_GOING first, then PREDICTION, then earliest PRE_TRIP
                     val active = events.firstOrNull { it.status == EventStatus.ON_GOING }
+                        ?: events.firstOrNull { it.status == EventStatus.PREDICTION }
                         ?: events.filter { it.status == EventStatus.PRE_TRIP }.minByOrNull { it.startDate }
 
                     // Upcoming: all non-finished events that are not the active one

@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.google.firebase.auth.FirebaseAuth
 import com.hectordev.mvp.domain.EventStatus
+import com.hectordev.mvp.domain.Prediction
 import com.hectordev.mvp.domain.User
 import com.hectordev.mvp.domain.repository.EventsRepository
 import com.hectordev.mvp.domain.repository.UserRepository
@@ -31,6 +32,8 @@ class EventDetailsViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow(EventDetailsUiState(currentUserId = currentUserId))
     val uiState: StateFlow<EventDetailsUiState> = _uiState.asStateFlow()
+
+    private var predictionLoaded = false
 
     init {
         observeEvent()
@@ -60,9 +63,48 @@ class EventDetailsViewModel @Inject constructor(
                             isLoading = false
                         )
                     }
+                    if (event != null &&
+                        (event.status == EventStatus.PREDICTION || event.status == EventStatus.ON_GOING) &&
+                        !predictionLoaded
+                    ) {
+                        predictionLoaded = true
+                        loadMyPrediction()
+                    }
                 }
             } catch (e: Exception) {
                 _uiState.update { it.copy(isLoading = false, error = e.localizedMessage) }
+            }
+        }
+    }
+
+    private fun loadMyPrediction() {
+        viewModelScope.launch {
+            runCatching {
+                val prediction = eventsRepository.getPrediction(eventId, currentUserId)
+                _uiState.update { it.copy(myPrediction = prediction) }
+            }
+        }
+    }
+
+    fun submitPrediction(projectedMvpId: String, tripleParticipantId: String) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isSubmittingPrediction = true) }
+            try {
+                val prediction = Prediction(projectedMvpId, tripleParticipantId)
+                eventsRepository.submitPrediction(eventId, currentUserId, prediction)
+                _uiState.update { it.copy(isSubmittingPrediction = false, myPrediction = prediction, predictionSaveCount = it.predictionSaveCount + 1) }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(isSubmittingPrediction = false, error = e.localizedMessage) }
+            }
+        }
+    }
+
+    fun openPredictions() {
+        viewModelScope.launch {
+            try {
+                eventsRepository.openPredictions(eventId)
+            } catch (e: Exception) {
+                _uiState.update { it.copy(error = e.localizedMessage) }
             }
         }
     }

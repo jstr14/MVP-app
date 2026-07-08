@@ -36,14 +36,21 @@
 * **Push Notification on Invite:** When a user is added to `pendingParticipants[]`, a Firebase Cloud Function triggers an FCM push notification to the invited user's device, so they are immediately aware of the invitation without needing to open the app.
 * **Dashboard Split UI (`HomeScreen`):** Four sections in order:
     * **Active Event:** ✅ Exactly one (1) live event the user can fully interact with. FAB to create a new event is hidden while an active event exists.
-    * **Pending Invitations:** Events where the user is in `pendingParticipants[]`. Each card shows event info and Accept / Decline buttons. Accepting moves the user from `pendingParticipants[]` to `participants[]`. No navigation into the event until accepted.
-    * **Upcoming Events:** Events where the user is in `participants[]` but already has an active event. Read-only cards with a lock indicator — navigation is blocked until the active event ends. Activates automatically once the current event finishes.
+    * **Pending Invitations:** ✅ Events where the user is in `pendingParticipants[]`. Each card shows event info and Accept / Decline buttons. Accepting moves the user from `pendingParticipants[]` to `participants[]`. No navigation into the event until accepted.
+    * **Upcoming Events:** ✅ Events where the user is in `participants[]` but already has an active event. Read-only cards with a lock indicator — navigation is blocked until the active event ends. Activates automatically once the current event finishes.
     * **Past Events Feed:** ✅ Finished events in read-only Viewer Mode showing MVP winner badge (only shown if the current user won).
-* **Start Event:** ✅ Admin-only action in the `EventDetailsScreen` TopAppBar. Transitions the event from `PRE_TRIP` to `ON_GOING`, freezing the participant pool.
-* **The "Triple" Prediction Setup:**
-    * Once the Admin closes the participant pool, all active players must submit a pre-trip prophecy.
-    * Inputs required: Projected Event MVP Winner + "The Triple" (A high-stakes wildcard prediction, chosen exclusively from the finalized list of event participants).
-    * System Admin switches state to `ON_GOING` to freeze predictions and start the live event.
+* **Open Predictions:** ✅ Admin-only action in the `EventDetailsScreen` TopAppBar (visible during `PRE_TRIP`). Transitions the event from `PRE_TRIP` to `PREDICTION`.
+    * Atomically clears `pendingParticipants[]` and `pendingEmails[]` — pending users missed their window.
+    * Participant pool is now final and frozen. All confirmed participants receive a push notification to submit their picks (Firebase Cloud Function + FCM).
+* **Start Event:** ✅ Admin-only action in the `EventDetailsScreen` TopAppBar (visible during `PREDICTION`). Transitions the event from `PREDICTION` to `ON_GOING`, freezing all submitted predictions.
+    * Participants who never submitted a prediction forfeit Oracle/Triple badge eligibility for this event. No late submissions allowed once `ON_GOING`.
+* **The "Triple" Prediction Setup:** ✅
+    * Available to all confirmed participants during `PREDICTION` state.
+    * Inputs required: Projected Event MVP Winner + "The Triple" (A high-stakes wildcard prediction, chosen exclusively from the finalized `participants[]` — self-selection locked).
+    * **Prediction visibility rules:**
+        * `PREDICTION`: each user sees and can edit only their own prediction. Others' are hidden.
+        * `ON_GOING`: your prediction is shown in read-only mode inside `EventDetailsScreen` as a personal reminder card. Others' still hidden.
+        * `VOTING_PHASE` / `FINISHED`: full reveal of all predictions alongside the final results in the gala screen.
 
 ### 🟠 Sprint 3: The Live Event Feed (Real-Time Lore & Micro-Scoring)
 * **Chronological Multimedia Wall:** Live Firestore snapshots (`addSnapshotListener`) feeding a real-time, highly synchronized chronological timeline across all participant devices.
@@ -98,8 +105,13 @@
 {
   "eventId": "STRING (Primary Key)",
   "title": "STRING",
-  "status": "STRING (PRE_TRIP | ON_GOING | VOTING_PHASE | FINISHED)",
+  "status": "STRING (PRE_TRIP | PREDICTION | ON_GOING | VOTING_PHASE | FINISHED)",
   "adminId": "STRING",
+  "startDate": "TIMESTAMP",
+  "endDate": "TIMESTAMP",
+  "locationLabel": "STRING (Nullable)",
+  "latitude": "NUMBER (Nullable)",
+  "longitude": "NUMBER (Nullable)",
   "participants": ["STRING (User UIDs — confirmed, active)"],
   "pendingParticipants": ["STRING (User UIDs — invited, awaiting response)"],
   "pendingEmails": ["STRING (Emails of invited users not yet registered)"],
@@ -113,7 +125,7 @@
 ```json
 {
   "projectedMvpId": "STRING (User UID)",
-  "tripleBetParticipantId": "STRING (User UID chosen from participant pool)"
+  "tripleParticipantId": "STRING (User UID chosen from participant pool)"
 }
 ```
 #### `/events/{eventId}/emergency_requests/{requestId}`
