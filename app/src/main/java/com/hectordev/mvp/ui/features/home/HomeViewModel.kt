@@ -1,6 +1,5 @@
 package com.hectordev.mvp.ui.features.home
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
@@ -65,7 +64,7 @@ class HomeViewModel @Inject constructor(
                 _uiState.update { it.copy(activeEvent = enriched, canCreateEvent = enriched == null) }
             }
             } catch (e: Exception) {
-                Log.e("HomeViewModel", "observeActiveEvent crashed: ${e.message}")
+                _uiState.update { it.copy(error = e.localizedMessage) }
             }
         }
     }
@@ -95,7 +94,7 @@ class HomeViewModel @Inject constructor(
                 _uiState.update { it.copy(pastEvents = enriched) }
             }
             } catch (e: Exception) {
-                Log.e("HomeViewModel", "observePastEvents crashed: ${e.message}")
+                _uiState.update { it.copy(error = e.localizedMessage) }
             }
         }
     }
@@ -112,6 +111,7 @@ class HomeViewModel @Inject constructor(
     }
 
     fun clearDeleteError() = _uiState.update { it.copy(deleteError = null) }
+    fun clearError() = _uiState.update { it.copy(error = null) }
     fun clearDebugMessage() = _uiState.update { it.copy(debugMessage = null) }
 
     // Ensures the current user always appears in the participant list with their photo,

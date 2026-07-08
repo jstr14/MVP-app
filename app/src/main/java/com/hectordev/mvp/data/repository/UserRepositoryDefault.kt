@@ -7,7 +7,6 @@ import com.hectordev.mvp.data.mapper.toDataModel
 import com.hectordev.mvp.data.mapper.toDomain
 import com.hectordev.mvp.domain.User
 import com.hectordev.mvp.domain.repository.UserRepository
-import android.util.Log
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -34,8 +33,7 @@ class UserRepositoryDefault @Inject constructor(
 
     override suspend fun saveUser(user: User) {
         val dataModel = user.toDataModel()
-        usersCollection.document(dataModel.id).set(dataModel)
-            .addOnFailureListener { Log.e("UserRepo", "saveUser failed: ${it.message}") }
+        usersCollection.document(dataModel.id).set(dataModel).await()
     }
 
     override suspend fun getUsersByIds(ids: List<String>): List<User> {
@@ -50,6 +48,18 @@ class UserRepositoryDefault @Inject constructor(
         } catch (e: Exception) {
             emptyList()
         }
+    }
+
+    override suspend fun getUserByEmail(email: String): User? {
+        return usersCollection
+            .whereEqualTo("email", email)
+            .limit(1)
+            .get()
+            .await()
+            .documents
+            .firstOrNull()
+            ?.toObject(UserDataModel::class.java)
+            ?.toDomain()
     }
 
     override fun getAllUsers(): Flow<List<User>> = callbackFlow {

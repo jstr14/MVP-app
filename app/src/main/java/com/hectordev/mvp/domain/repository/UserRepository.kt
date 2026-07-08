@@ -7,5 +7,6 @@ interface UserRepository {
     suspend fun getCurrentUser(userId: String): User?
     suspend fun saveUser(user: User)
     suspend fun getUsersByIds(ids: List<String>): List<User>
+    suspend fun getUserByEmail(email: String): User?
     fun getAllUsers(): Flow<List<User>>
 }

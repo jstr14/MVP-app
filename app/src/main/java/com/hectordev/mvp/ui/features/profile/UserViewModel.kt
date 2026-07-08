@@ -28,18 +28,21 @@ class UserViewModel @Inject constructor(
         val firebaseUser = firebaseAuth.currentUser ?: return
 
         // Populate immediately from FirebaseAuth — always available, no network needed
-        _userState.value = User(
+        val authUser = User(
             id = firebaseUser.uid,
             name = firebaseUser.displayName ?: "",
             email = firebaseUser.email ?: "",
             photoUrl = firebaseUser.photoUrl?.toString()
         )
+        _userState.value = authUser
 
-        // Enrich asynchronously from Firestore (stats, mvpCount, etc.)
-        // If the document doesn't exist yet, we keep the FirebaseAuth data
+        // Upsert to Firestore: create the document on first login, or enrich with stored stats
         viewModelScope.launch {
-            userRepository.getCurrentUser(firebaseUser.uid)?.let {
-                _userState.value = it
+            val stored = userRepository.getCurrentUser(firebaseUser.uid)
+            if (stored == null) {
+                userRepository.saveUser(authUser)
+            } else {
+                _userState.value = stored
             }
         }
     }

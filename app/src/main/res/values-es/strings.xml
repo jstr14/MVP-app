@@ -15,6 +15,25 @@
     <string name="home_dashboard_placeholder">Panel de control próximamente</string>
     <string name="home_create_event_fab_accessibility">Crear nuevo evento</string>
     <string name="home_event_created_success">¡Evento creado correctamente!</string>
+    <!-- Event Details Feature Strings -->
+    <string name="event_details_section_participants">Participantes</string>
+    <string name="event_details_admin_badge">Admin</string>
+    <string name="event_details_start_event_btn">Iniciar evento</string>
+    <string name="event_details_start_confirm_title">¿Iniciar evento?</string>
+    <string name="event_details_start_confirm_message">Las predicciones quedarán bloqueadas y el evento se pondrá en marcha. Esta acción no se puede deshacer.</string>
+    <string name="event_details_start_confirm_btn">Iniciar</string>
+    <string name="event_details_invite_participant_btn">Invitar participante</string>
+    <string name="event_details_invite_dialog_title">Invitar a un amigo</string>
+    <string name="event_details_invite_email_label">Correo electrónico</string>
+    <string name="event_details_invite_email_placeholder">amigo@ejemplo.com</string>
+    <string name="event_details_invite_btn">Invitar</string>
+    <string name="event_details_invite_error_not_found">No se encontró ningún usuario con ese correo</string>
+    <string name="event_details_invite_error_already_member">Este usuario ya está en el evento</string>
+    <string name="event_details_invite_error_unknown">Algo salió mal. Inténtalo de nuevo.</string>
+    <string name="event_details_section_pending">Invitaciones pendientes</string>
+    <string name="event_details_pending_badge">Pendiente</string>
+    <string name="event_details_remove_participant">Eliminar participante</string>
+
     <string name="home_section_active_event">Evento activo</string>
     <string name="home_section_past_events">Eventos pasados</string>
     <string name="home_no_active_event">Sin evento activo. Toca + para crear uno.</string>

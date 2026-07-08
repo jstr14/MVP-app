@@ -55,6 +55,7 @@ fun HomeScreen(
     modifier: Modifier = Modifier,
     onLogout: () -> Unit,
     onCreateEvent: () -> Unit,
+    onEventClick: (eventId: String) -> Unit = {},
     showEventCreatedMessage: Boolean = false,
     onEventCreatedMessageShown: () -> Unit = {},
     viewModel: HomeViewModel = hiltViewModel()
@@ -68,10 +69,12 @@ fun HomeScreen(
         onEventCreatedMessageShown = onEventCreatedMessageShown,
         onLogout = onLogout,
         onCreateEvent = onCreateEvent,
+        onEventClick = onEventClick,
         onDeleteActiveEvent = viewModel::deleteActiveEvent,
         onAcceptInvitation = viewModel::acceptInvitation,
         onDeclineInvitation = viewModel::declineInvitation,
         onDeleteErrorShown = viewModel::clearDeleteError,
+        onErrorShown = viewModel::clearError,
         onDebugMessageShown = viewModel::clearDebugMessage,
         onSeedPreTrip = viewModel::seedPreTripEvent,
         onSeedOnGoing = viewModel::seedOnGoingEvent,
@@ -90,10 +93,12 @@ private fun HomeScreenContent(
     onEventCreatedMessageShown: () -> Unit = {},
     onLogout: () -> Unit,
     onCreateEvent: () -> Unit,
+    onEventClick: (eventId: String) -> Unit = {},
     onDeleteActiveEvent: () -> Unit,
     onAcceptInvitation: (String) -> Unit = {},
     onDeclineInvitation: (String) -> Unit = {},
     onDeleteErrorShown: () -> Unit = {},
+    onErrorShown: () -> Unit = {},
     onDebugMessageShown: () -> Unit = {},
     onSeedPreTrip: () -> Unit = {},
     onSeedOnGoing: () -> Unit = {},
@@ -117,6 +122,13 @@ private fun HomeScreenContent(
         uiState.deleteError?.let {
             snackbarHostState.showSnackbar(it)
             onDeleteErrorShown()
+        }
+    }
+
+    LaunchedEffect(uiState.error) {
+        uiState.error?.let {
+            snackbarHostState.showSnackbar(it)
+            onErrorShown()
         }
     }
 
@@ -234,7 +246,8 @@ private fun HomeScreenContent(
                     ActiveEventCard(
                         item = uiState.activeEvent,
                         isAdmin = uiState.activeEvent.event.adminId == uiState.currentUserId,
-                        onDelete = onDeleteActiveEvent
+                        onDelete = onDeleteActiveEvent,
+                        onClick = { onEventClick(uiState.activeEvent.event.id) }
                     )
                 } else {
                     Text(
@@ -367,6 +380,7 @@ private fun HomeScreenAllSectionsPreview() {
                 uiState = previewUiState,
                 onLogout = {},
                 onCreateEvent = {},
+                onEventClick = {},
                 onDeleteActiveEvent = {}
             )
         }
@@ -387,6 +401,7 @@ private fun HomeScreenNoActiveEventPreview() {
                 ),
                 onLogout = {},
                 onCreateEvent = {},
+                onEventClick = {},
                 onDeleteActiveEvent = {}
             )
         }

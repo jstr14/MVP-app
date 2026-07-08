@@ -12,5 +12,6 @@ data class HomeUiState(
     val upcomingEvents: List<Event> = emptyList(),
     val pastEvents: List<EventWithParticipants> = emptyList(),
     val deleteError: String? = null,
+    val error: String? = null,
     val debugMessage: String? = null
 )

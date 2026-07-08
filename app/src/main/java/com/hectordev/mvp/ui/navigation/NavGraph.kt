@@ -12,6 +12,7 @@ import com.hectordev.mvp.ui.features.auth.AuthViewModel
 import com.hectordev.mvp.ui.features.auth.LoginScreen
 import com.hectordev.mvp.ui.features.auth.SplashScreen
 import com.hectordev.mvp.ui.features.event.CreateEventScreen
+import com.hectordev.mvp.ui.features.event.EventDetailsScreen
 import com.hectordev.mvp.ui.features.home.HomeScreen
 
 @Composable
@@ -62,8 +63,15 @@ fun AppNavGraph(
                 },
                 onCreateEvent = {
                     navController.navigate(AppDestination.CreateEvent)
+                },
+                onEventClick = { eventId ->
+                    navController.navigate(AppDestination.EventDetails(eventId))
                 }
             )
+        }
+
+        composable<AppDestination.EventDetails> {
+            EventDetailsScreen(onBack = { navController.popBackStack() })
         }
 
         composable<AppDestination.CreateEvent> {

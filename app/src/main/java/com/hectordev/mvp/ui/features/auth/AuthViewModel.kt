@@ -12,6 +12,9 @@ import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.firebase.auth.GoogleAuthProvider
 import com.hectordev.mvp.BuildConfig
+import com.hectordev.mvp.domain.User
+import com.hectordev.mvp.domain.repository.EventsRepository
+import com.hectordev.mvp.domain.repository.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -22,7 +25,10 @@ import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
 @HiltViewModel
-class AuthViewModel @Inject constructor() : ViewModel() {
+class AuthViewModel @Inject constructor(
+    private val userRepository: UserRepository,
+    private val eventsRepository: EventsRepository
+) : ViewModel() {
 
     // Firebase Auth instance reference
     private val firebaseAuth = FirebaseAuth.getInstance()
@@ -89,13 +95,26 @@ class AuthViewModel @Inject constructor() : ViewModel() {
                     // If the network call fails, it will automatically throw a Firebase exception handled by the catch block below
                     val authResult = firebaseAuth.signInWithCredential(firebaseCredential).await()
 
-                    if (authResult.user != null) {
+                    val firebaseUser = authResult.user
+                    if (firebaseUser != null) {
+                        val email = firebaseUser.email ?: ""
+                        userRepository.saveUser(
+                            User(
+                                id = firebaseUser.uid,
+                                name = firebaseUser.displayName ?: "",
+                                email = email,
+                                photoUrl = firebaseUser.photoUrl?.toString()
+                            )
+                        )
+                        if (email.isNotEmpty()) {
+                            runCatching { eventsRepository.bindPendingEmailInvite(email, firebaseUser.uid) }
+                        }
                         // Success path: update session states and trigger UI navigation
                         _isUserLoggedIn.value = true
                         _uiState.update { it.copy(isLoading = false, isSuccess = true) }
                     } else {
                         _uiState.update {
-                            it.copy(isLoading = false, errorMessage = "Firebase successfully authenticated but returned an empty profile.")
+                            it.copy(isLoading = false, errorMessage = "Authentication succeeded but returned an empty profile.")
                         }
                     }
                 } else {

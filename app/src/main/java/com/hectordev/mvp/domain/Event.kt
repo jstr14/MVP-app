@@ -11,6 +11,8 @@ data class Event(
     val status: EventStatus = EventStatus.PRE_TRIP,
     val adminId: String = "",
     val participants: List<String> = emptyList(),
+    val pendingParticipants: List<String> = emptyList(),
+    val pendingEmails: List<String> = emptyList(),
     val mvpId: String? = null,
     val galaPhotoUrl: String? = null,
     val activeEmergencyId: String? = null,

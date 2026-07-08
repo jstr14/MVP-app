@@ -94,11 +94,7 @@ class CreateEventViewModel @Inject constructor(
             _uiState.update { it.copy(isLoading = false, isSuccess = true) }
 
             // Fire-and-forget: Firestore offline persistence will sync when ready
-            try {
-                eventsRepository.createEvent(event)
-            } catch (e: Exception) {
-                android.util.Log.e("CreateEvent", "Failed to save event: ${e.message}")
-            }
+            runCatching { eventsRepository.createEvent(event) }
         }
     }
 

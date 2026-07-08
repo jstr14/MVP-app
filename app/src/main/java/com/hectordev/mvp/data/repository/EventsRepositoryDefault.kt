@@ -1,6 +1,6 @@
 package com.hectordev.mvp.data.repository
 
-import android.util.Log
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.hectordev.mvp.data.mapper.toDomain
 import com.hectordev.mvp.data.mapper.toDto
@@ -36,35 +36,75 @@ class EventsRepositoryDefault @Inject constructor(
     }
 
     override suspend fun updateEvent(event: Event) {
-        try {
-            eventsCollection.document(event.id).set(event.toDto()).await()
-        } catch (e: Exception) { }
+        eventsCollection.document(event.id).set(event.toDto()).await()
     }
 
     override suspend fun deleteEvent(eventId: String) {
         eventsCollection.document(eventId).delete().await()
     }
 
+    override suspend fun inviteParticipant(eventId: String, userId: String) {
+        eventsCollection.document(eventId)
+            .update("pendingParticipants", FieldValue.arrayUnion(userId))
+            .await()
+    }
+
+    override suspend fun removeParticipant(eventId: String, userId: String) {
+        eventsCollection.document(eventId)
+            .update("participants", FieldValue.arrayRemove(userId))
+            .await()
+    }
+
+    override suspend fun cancelInvite(eventId: String, userId: String) {
+        eventsCollection.document(eventId)
+            .update("pendingParticipants", FieldValue.arrayRemove(userId))
+            .await()
+    }
+
+    override suspend fun invitePendingEmail(eventId: String, email: String) {
+        eventsCollection.document(eventId)
+            .update("pendingEmails", FieldValue.arrayUnion(email))
+            .await()
+    }
+
+    override suspend fun cancelEmailInvite(eventId: String, email: String) {
+        eventsCollection.document(eventId)
+            .update("pendingEmails", FieldValue.arrayRemove(email))
+            .await()
+    }
+
+    override suspend fun bindPendingEmailInvite(email: String, userId: String) {
+        val events = eventsCollection
+            .whereArrayContains("pendingEmails", email)
+            .get()
+            .await()
+        for (doc in events.documents) {
+            doc.reference.update(
+                "pendingEmails", FieldValue.arrayRemove(email),
+                "pendingParticipants", FieldValue.arrayUnion(userId)
+            ).await()
+        }
+    }
+
     override suspend fun updateStatus(eventId: String, status: EventStatus) {
-        try {
-            eventsCollection.document(eventId).update("status", status.name).await()
-        } catch (e: Exception) { }
+        eventsCollection.document(eventId).update("status", status.name).await()
+    }
+
+    override fun observeEvent(eventId: String): Flow<Event?> = callbackFlow {
+        val subscription = eventsCollection.document(eventId)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) { close(error); return@addSnapshotListener }
+                trySend(snapshot?.toObject(EventDto::class.java)?.toDomain())
+            }
+        awaitClose { subscription.remove() }
     }
 
     override fun observeActiveEvent(userId: String): Flow<Event?> = callbackFlow {
-        if (userId.isEmpty()) {
-            Log.w("EventsRepo", "observeActiveEvent called with empty userId")
-            trySend(null)
-            awaitClose { }
-            return@callbackFlow
-        }
+        if (userId.isEmpty()) { trySend(null); awaitClose { }; return@callbackFlow }
         val subscription = eventsCollection
             .whereArrayContains("participants", userId)
             .addSnapshotListener { snapshot, error ->
-                if (error != null) {
-                    Log.e("EventsRepo", "observeActiveEvent error: ${error.message}")
-                    return@addSnapshotListener
-                }
+                if (error != null) { close(error); return@addSnapshotListener }
                 val active = snapshot?.documents
                     ?.mapNotNull { it.toObject(EventDto::class.java)?.toDomain() }
                     ?.firstOrNull { it.status == EventStatus.PRE_TRIP || it.status == EventStatus.ON_GOING }
@@ -74,19 +114,11 @@ class EventsRepositoryDefault @Inject constructor(
     }
 
     override fun observePastEvents(userId: String): Flow<List<Event>> = callbackFlow {
-        if (userId.isEmpty()) {
-            Log.w("EventsRepo", "observePastEvents called with empty userId")
-            trySend(emptyList())
-            awaitClose { }
-            return@callbackFlow
-        }
+        if (userId.isEmpty()) { trySend(emptyList()); awaitClose { }; return@callbackFlow }
         val subscription = eventsCollection
             .whereArrayContains("participants", userId)
             .addSnapshotListener { snapshot, error ->
-                if (error != null) {
-                    Log.e("EventsRepo", "observePastEvents error: ${error.message}")
-                    return@addSnapshotListener
-                }
+                if (error != null) { close(error); return@addSnapshotListener }
                 val past = snapshot?.documents
                     ?.mapNotNull { it.toObject(EventDto::class.java)?.toDomain() }
                     ?.filter { it.status == EventStatus.FINISHED }

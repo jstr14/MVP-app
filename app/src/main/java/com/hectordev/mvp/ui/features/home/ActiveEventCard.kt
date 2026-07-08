@@ -44,6 +44,7 @@ internal fun ActiveEventCard(
     item: EventWithParticipants,
     isAdmin: Boolean,
     onDelete: () -> Unit,
+    onClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     var showMenu by remember { mutableStateOf(false) }
@@ -71,6 +72,7 @@ internal fun ActiveEventCard(
     }
 
     Card(
+        onClick = onClick,
         modifier = modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.primaryContainer,

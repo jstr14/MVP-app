@@ -37,6 +37,25 @@
     <string name="home_pending_decline">Decline</string>
     <string name="home_upcoming_locked_message">Available when your current event ends</string>
 
+    <!-- Event Details Feature Strings -->
+    <string name="event_details_section_participants">Participants</string>
+    <string name="event_details_admin_badge">Admin</string>
+    <string name="event_details_start_event_btn">Start Event</string>
+    <string name="event_details_start_confirm_title">Start event?</string>
+    <string name="event_details_start_confirm_message">Predictions will be frozen and the event will go live. This cannot be undone.</string>
+    <string name="event_details_start_confirm_btn">Start</string>
+    <string name="event_details_invite_participant_btn">Invite participant</string>
+    <string name="event_details_invite_dialog_title">Invite a friend</string>
+    <string name="event_details_invite_email_label">Email address</string>
+    <string name="event_details_invite_email_placeholder">friend@example.com</string>
+    <string name="event_details_invite_btn">Invite</string>
+    <string name="event_details_invite_error_not_found">No user found with that email</string>
+    <string name="event_details_invite_error_already_member">This user is already in the event</string>
+    <string name="event_details_invite_error_unknown">Something went wrong. Please try again.</string>
+    <string name="event_details_section_pending">Pending Invitations</string>
+    <string name="event_details_pending_badge">Pending</string>
+    <string name="event_details_remove_participant">Remove participant</string>
+
     <!-- Create Event Feature Strings -->
     <string name="create_event_screen_title">Create Event</string>
     <string name="create_event_name_label">Event name *</string>
