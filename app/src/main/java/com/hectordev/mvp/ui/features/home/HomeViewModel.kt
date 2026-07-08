@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
 import com.hectordev.mvp.BuildConfig
 import com.hectordev.mvp.debug.DebugDataSeeder
+import com.hectordev.mvp.domain.EventStatus
 import com.hectordev.mvp.domain.User
 import com.hectordev.mvp.domain.repository.EventsRepository
 import com.hectordev.mvp.domain.repository.UserRepository
@@ -31,8 +32,7 @@ class HomeViewModel @Inject constructor(
 
     init {
         loadUserData()
-        observeActiveEvent()
-        observePastEvents()
+        observeParticipantEvents()
         observePendingInvitations()
     }
 
@@ -51,49 +51,56 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    private fun observeActiveEvent() {
+    private fun observeParticipantEvents() {
         viewModelScope.launch {
             try {
-            eventsRepository.observeActiveEvent(currentUserId).collect { event ->
-                val participants = try {
-                    val ids = event?.participants?.takeIf { it.isNotEmpty() } ?: emptyList()
-                    enrichParticipants(userRepository.getUsersByIds(ids))
-                } catch (e: Exception) {
-                    emptyList()
-                }
-                val enriched = event?.let { EventWithParticipants(it, participants) }
-                _uiState.update { it.copy(activeEvent = enriched, canCreateEvent = enriched == null) }
-            }
-            } catch (e: Exception) {
-                _uiState.update { it.copy(error = e.localizedMessage) }
-            }
-        }
-    }
+                eventsRepository.observeParticipantEvents(currentUserId).collect { events ->
+                    // Active: prefer ON_GOING, fall back to earliest PRE_TRIP
+                    val active = events.firstOrNull { it.status == EventStatus.ON_GOING }
+                        ?: events.filter { it.status == EventStatus.PRE_TRIP }.minByOrNull { it.startDate }
 
-    private fun observePastEvents() {
-        viewModelScope.launch {
-            try {
-            eventsRepository.observePastEvents(currentUserId).collect { events ->
-                if (events.isEmpty()) {
-                    _uiState.update { it.copy(pastEvents = emptyList()) }
-                    return@collect
-                }
-                val allIds = events.flatMap { it.participants }.distinct()
-                val usersById = try {
-                    userRepository.getUsersByIds(allIds).associateBy { it.id }
-                } catch (e: Exception) {
-                    emptyMap()
-                }
-                val enriched = events.map { event ->
-                    EventWithParticipants(
-                        event = event,
-                        participants = enrichParticipants(
-                            event.participants.mapNotNull { usersById[it] }
+                    // Upcoming: all non-finished events that are not the active one
+                    val upcoming = events
+                        .filter { it.status != EventStatus.FINISHED && it.id != active?.id }
+                        .sortedBy { it.startDate }
+
+                    val past = events.filter { it.status == EventStatus.FINISHED }
+
+                    // Enrich active event participants
+                    val activeParticipants = if (active != null) {
+                        try {
+                            val ids = active.participants.takeIf { it.isNotEmpty() } ?: emptyList()
+                            enrichParticipants(userRepository.getUsersByIds(ids))
+                        } catch (e: Exception) {
+                            emptyList()
+                        }
+                    } else emptyList()
+
+                    // Batch-load all past participants in one call
+                    val allPastIds = past.flatMap { it.participants }.distinct()
+                    val pastUsersById = try {
+                        userRepository.getUsersByIds(allPastIds).associateBy { it.id }
+                    } catch (e: Exception) {
+                        emptyMap()
+                    }
+                    val enrichedPast = past.map { event ->
+                        EventWithParticipants(
+                            event = event,
+                            participants = enrichParticipants(
+                                event.participants.mapNotNull { pastUsersById[it] }
+                            )
                         )
-                    )
+                    }
+
+                    _uiState.update {
+                        it.copy(
+                            activeEvent = active?.let { EventWithParticipants(it, activeParticipants) },
+                            canCreateEvent = active == null,
+                            upcomingEvents = upcoming,
+                            pastEvents = enrichedPast
+                        )
+                    }
                 }
-                _uiState.update { it.copy(pastEvents = enriched) }
-            }
             } catch (e: Exception) {
                 _uiState.update { it.copy(error = e.localizedMessage) }
             }

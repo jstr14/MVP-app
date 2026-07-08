@@ -19,7 +19,6 @@ interface EventsRepository {
     suspend fun acceptInvitation(eventId: String, userId: String)
     suspend fun declineInvitation(eventId: String, userId: String)
     fun observeEvent(eventId: String): Flow<Event?>
-    fun observeActiveEvent(userId: String): Flow<Event?>
-    fun observePastEvents(userId: String): Flow<List<Event>>
+    fun observeParticipantEvents(userId: String): Flow<List<Event>>
     fun observePendingInvitations(userId: String): Flow<List<Event>>
 }

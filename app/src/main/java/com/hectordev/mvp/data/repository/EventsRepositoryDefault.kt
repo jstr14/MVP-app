@@ -113,16 +113,16 @@ class EventsRepositoryDefault @Inject constructor(
         awaitClose { subscription.remove() }
     }
 
-    override fun observeActiveEvent(userId: String): Flow<Event?> = callbackFlow {
-        if (userId.isEmpty()) { trySend(null); awaitClose { }; return@callbackFlow }
+    override fun observeParticipantEvents(userId: String): Flow<List<Event>> = callbackFlow {
+        if (userId.isEmpty()) { trySend(emptyList()); awaitClose { }; return@callbackFlow }
         val subscription = eventsCollection
             .whereArrayContains("participants", userId)
             .addSnapshotListener { snapshot, error ->
                 if (error != null) { close(error); return@addSnapshotListener }
-                val active = snapshot?.documents
+                val events = snapshot?.documents
                     ?.mapNotNull { it.toObject(EventDto::class.java)?.toDomain() }
-                    ?.firstOrNull { it.status == EventStatus.PRE_TRIP || it.status == EventStatus.ON_GOING }
-                trySend(active)
+                    ?: emptyList()
+                trySend(events)
             }
         awaitClose { subscription.remove() }
     }
@@ -142,18 +142,4 @@ class EventsRepositoryDefault @Inject constructor(
         awaitClose { subscription.remove() }
     }
 
-    override fun observePastEvents(userId: String): Flow<List<Event>> = callbackFlow {
-        if (userId.isEmpty()) { trySend(emptyList()); awaitClose { }; return@callbackFlow }
-        val subscription = eventsCollection
-            .whereArrayContains("participants", userId)
-            .addSnapshotListener { snapshot, error ->
-                if (error != null) { close(error); return@addSnapshotListener }
-                val past = snapshot?.documents
-                    ?.mapNotNull { it.toObject(EventDto::class.java)?.toDomain() }
-                    ?.filter { it.status == EventStatus.FINISHED }
-                    ?: emptyList()
-                trySend(past)
-            }
-        awaitClose { subscription.remove() }
-    }
 }
