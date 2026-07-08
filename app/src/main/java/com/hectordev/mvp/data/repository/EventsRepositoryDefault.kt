@@ -86,6 +86,20 @@ class EventsRepositoryDefault @Inject constructor(
         }
     }
 
+    override suspend fun acceptInvitation(eventId: String, userId: String) {
+        eventsCollection.document(eventId)
+            .update(
+                "pendingParticipants", FieldValue.arrayRemove(userId),
+                "participants", FieldValue.arrayUnion(userId)
+            ).await()
+    }
+
+    override suspend fun declineInvitation(eventId: String, userId: String) {
+        eventsCollection.document(eventId)
+            .update("pendingParticipants", FieldValue.arrayRemove(userId))
+            .await()
+    }
+
     override suspend fun updateStatus(eventId: String, status: EventStatus) {
         eventsCollection.document(eventId).update("status", status.name).await()
     }
@@ -109,6 +123,21 @@ class EventsRepositoryDefault @Inject constructor(
                     ?.mapNotNull { it.toObject(EventDto::class.java)?.toDomain() }
                     ?.firstOrNull { it.status == EventStatus.PRE_TRIP || it.status == EventStatus.ON_GOING }
                 trySend(active)
+            }
+        awaitClose { subscription.remove() }
+    }
+
+    override fun observePendingInvitations(userId: String): Flow<List<Event>> = callbackFlow {
+        if (userId.isEmpty()) { trySend(emptyList()); awaitClose { }; return@callbackFlow }
+        val subscription = eventsCollection
+            .whereArrayContains("pendingParticipants", userId)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) { close(error); return@addSnapshotListener }
+                val pending = snapshot?.documents
+                    ?.mapNotNull { it.toObject(EventDto::class.java)?.toDomain() }
+                    ?.filter { it.status != EventStatus.FINISHED }
+                    ?: emptyList()
+                trySend(pending)
             }
         awaitClose { subscription.remove() }
     }

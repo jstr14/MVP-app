@@ -33,6 +33,7 @@ class HomeViewModel @Inject constructor(
         loadUserData()
         observeActiveEvent()
         observePastEvents()
+        observePendingInvitations()
     }
 
     private fun loadUserData() {
@@ -135,9 +136,37 @@ class HomeViewModel @Inject constructor(
         return withCurrentUser.sortedWith { a, _ -> if (a.id == currentUserId) 1 else -1 }
     }
 
-    // TODO: implement when invite system is built (Sprint 2 - Event Details)
-    fun acceptInvitation(eventId: String) { }
-    fun declineInvitation(eventId: String) { }
+    private fun observePendingInvitations() {
+        viewModelScope.launch {
+            try {
+                eventsRepository.observePendingInvitations(currentUserId).collect { events ->
+                    _uiState.update { it.copy(pendingInvitations = events) }
+                }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(error = e.localizedMessage) }
+            }
+        }
+    }
+
+    fun acceptInvitation(eventId: String) {
+        viewModelScope.launch {
+            try {
+                eventsRepository.acceptInvitation(eventId, currentUserId)
+            } catch (e: Exception) {
+                _uiState.update { it.copy(error = e.localizedMessage) }
+            }
+        }
+    }
+
+    fun declineInvitation(eventId: String) {
+        viewModelScope.launch {
+            try {
+                eventsRepository.declineInvitation(eventId, currentUserId)
+            } catch (e: Exception) {
+                _uiState.update { it.copy(error = e.localizedMessage) }
+            }
+        }
+    }
 
     // --- DEBUG ONLY ---
 
