@@ -1,8 +1,10 @@
 package com.hectordev.mvp.di
 
 import com.hectordev.mvp.data.repository.AuthRepositoryDefault
+import com.hectordev.mvp.data.repository.EventsRepositoryDefault
 import com.hectordev.mvp.data.repository.UserRepositoryDefault
 import com.hectordev.mvp.domain.repository.AuthRepository
+import com.hectordev.mvp.domain.repository.EventsRepository
 import com.hectordev.mvp.domain.repository.UserRepository
 import dagger.Binds
 import dagger.Module
@@ -25,4 +27,10 @@ abstract class RepositoryModule {
     abstract fun bindAuthRepository(
         authRepositoryDefault: AuthRepositoryDefault
     ): AuthRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindEventsRepository(
+        eventsRepositoryDefault: EventsRepositoryDefault
+    ): EventsRepository
 }
