@@ -1,11 +1,13 @@
 package com.hectordev.mvp.data.repository
 
+import com.google.firebase.firestore.FieldPath
 import com.google.firebase.firestore.FirebaseFirestore
 import com.hectordev.mvp.data.domain.UserDataModel
 import com.hectordev.mvp.data.mapper.toDataModel
 import com.hectordev.mvp.data.mapper.toDomain
 import com.hectordev.mvp.domain.User
 import com.hectordev.mvp.domain.repository.UserRepository
+import android.util.Log
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -31,11 +33,22 @@ class UserRepositoryDefault @Inject constructor(
     }
 
     override suspend fun saveUser(user: User) {
-        try {
-            // Transform model from domain to datamodel for Firebase
-            val dataModel = user.toDataModel()
-            usersCollection.document(dataModel.id).set(dataModel).await()
+        val dataModel = user.toDataModel()
+        usersCollection.document(dataModel.id).set(dataModel)
+            .addOnFailureListener { Log.e("UserRepo", "saveUser failed: ${it.message}") }
+    }
+
+    override suspend fun getUsersByIds(ids: List<String>): List<User> {
+        if (ids.isEmpty()) return emptyList()
+        return try {
+            usersCollection
+                .whereIn(FieldPath.documentId(), ids)
+                .get()
+                .await()
+                .documents
+                .mapNotNull { it.toObject(UserDataModel::class.java)?.toDomain() }
         } catch (e: Exception) {
+            emptyList()
         }
     }
 

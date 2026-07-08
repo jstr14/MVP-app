@@ -54,10 +54,8 @@ import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.android.gms.location.LocationServices
 import com.hectordev.mvp.R
+import com.hectordev.mvp.ui.core.extensions.toFormattedDate
 import com.hectordev.mvp.ui.core.theme.MVPTheme
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 
 @Composable
 fun CreateEventScreen(
@@ -335,11 +333,6 @@ private fun CreateEventScreenContent(
             }
         ) { DatePicker(state = endDatePickerState) }
     }
-}
-
-private fun Long.toFormattedDate(): String {
-    if (this == 0L) return ""
-    return SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).format(Date(this))
 }
 
 // --- SCREEN PREVIEWS ---

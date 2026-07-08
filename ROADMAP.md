@@ -30,9 +30,11 @@
     * Create events containing metadata: name, date range, and an initial user roles.
     * Friend lookup feature using exact email matching queries directly targeting the `/users` collection. Inviting participants pushes a real-time system notification.
     * Support for "Pending Invitations" to bind users who register with Google post-event creation.
-* **Dashboard Split UI (`HomeScreen`):**
-    * **Active Section:** Displays exactly one (1) primary live event in progress.
-    * **Past Events Feed:** Displays finished historical events in a read-only "Viewer Mode" explicitly highlighting the final MVP winner badge (mvpId).
+* **Dashboard Split UI (`HomeScreen`):** Four sections in order:
+    * **Active Event:** Exactly one (1) live event the user can fully interact with. FAB to create a new event is hidden while an active event exists.
+    * **Pending Invitations:** Events where the user is in `pendingParticipants[]`. Each card shows event info and Accept / Decline buttons. No navigation into the event until accepted.
+    * **Upcoming Events:** Events where the user is in `participants[]` but already has an active event. Read-only cards with a lock indicator — navigation is blocked until the active event ends. Activates automatically once the current event finishes.
+    * **Past Events Feed:** Finished events in read-only Viewer Mode showing MVP winner badge (only shown if the current user won).
 * **The "Triple" Prediction Setup:**
     * Once the Admin closes the participant pool, all active players must submit a pre-trip prophecy.
     * Inputs required: Projected Event MVP Winner + "The Triple" (A high-stakes wildcard prediction, chosen exclusively from the finalized list of event participants).
@@ -93,7 +95,8 @@
   "title": "STRING",
   "status": "STRING (PRE_TRIP | ON_GOING | VOTING_PHASE | FINISHED)",
   "adminId": "STRING",
-  "participants": ["STRING (User UIDs)"],
+  "participants": ["STRING (User UIDs — confirmed, active)"],
+  "pendingParticipants": ["STRING (User UIDs — invited, awaiting response)"],
   "mvpId": "STRING (Nullable)",
   "galaPhotoUrl": "STRING (Nullable)",
   "activeEmergencyId": "STRING (Nullable)",

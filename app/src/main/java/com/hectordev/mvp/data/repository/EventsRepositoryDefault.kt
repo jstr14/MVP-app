@@ -1,5 +1,6 @@
 package com.hectordev.mvp.data.repository
 
+import android.util.Log
 import com.google.firebase.firestore.FirebaseFirestore
 import com.hectordev.mvp.data.mapper.toDomain
 import com.hectordev.mvp.data.mapper.toDto
@@ -40,19 +41,30 @@ class EventsRepositoryDefault @Inject constructor(
         } catch (e: Exception) { }
     }
 
+    override suspend fun deleteEvent(eventId: String) {
+        eventsCollection.document(eventId).delete().await()
+    }
+
     override suspend fun updateStatus(eventId: String, status: EventStatus) {
         try {
             eventsCollection.document(eventId).update("status", status.name).await()
         } catch (e: Exception) { }
     }
 
-    // Queries all events the user participates in and filters active ones in-memory
-    // to avoid requiring a composite Firestore index.
     override fun observeActiveEvent(userId: String): Flow<Event?> = callbackFlow {
+        if (userId.isEmpty()) {
+            Log.w("EventsRepo", "observeActiveEvent called with empty userId")
+            trySend(null)
+            awaitClose { }
+            return@callbackFlow
+        }
         val subscription = eventsCollection
             .whereArrayContains("participants", userId)
             .addSnapshotListener { snapshot, error ->
-                if (error != null) { close(error); return@addSnapshotListener }
+                if (error != null) {
+                    Log.e("EventsRepo", "observeActiveEvent error: ${error.message}")
+                    return@addSnapshotListener
+                }
                 val active = snapshot?.documents
                     ?.mapNotNull { it.toObject(EventDto::class.java)?.toDomain() }
                     ?.firstOrNull { it.status == EventStatus.PRE_TRIP || it.status == EventStatus.ON_GOING }
@@ -62,10 +74,19 @@ class EventsRepositoryDefault @Inject constructor(
     }
 
     override fun observePastEvents(userId: String): Flow<List<Event>> = callbackFlow {
+        if (userId.isEmpty()) {
+            Log.w("EventsRepo", "observePastEvents called with empty userId")
+            trySend(emptyList())
+            awaitClose { }
+            return@callbackFlow
+        }
         val subscription = eventsCollection
             .whereArrayContains("participants", userId)
             .addSnapshotListener { snapshot, error ->
-                if (error != null) { close(error); return@addSnapshotListener }
+                if (error != null) {
+                    Log.e("EventsRepo", "observePastEvents error: ${error.message}")
+                    return@addSnapshotListener
+                }
                 val past = snapshot?.documents
                     ?.mapNotNull { it.toObject(EventDto::class.java)?.toDomain() }
                     ?.filter { it.status == EventStatus.FINISHED }
