@@ -1,6 +1,6 @@
-package com.hectordev.mvp.data.domain
+package com.hectordev.mvp.data.model
 
-data class UserDataModel(
+data class UserDto(
     val id: String = "",
     val name: String = "",
     val email: String = "",

@@ -27,9 +27,16 @@
 
 ### 🟡 Sprint 2: Event Lifecycle Management & Pre-Trip Strategy
 * **Event Creation Log:**
-    * Create events containing metadata: name, date range, and an initial user roles.
+    * Create events containing metadata: name, date range, location, and an initial user roles.
+    * Location is captured via a short user-defined label (e.g. "Beach house", "Madrid") plus optional coordinates obtained from a **"Use current location"** button backed by `FusedLocationProviderClient` — no extra SDK required beyond Google Play Services.
+    * Storing `latitude` / `longitude` alongside the label avoids a Geocoding API round-trip and makes the map stretch goal trivially simple to implement later.
+    * **Stretch goal (time permitting):** Display the saved coordinates as a pinned marker on a small embedded Google Map in the Event Details screen.
     * Friend lookup feature using exact email matching queries directly targeting the `/users` collection. Inviting participants pushes a real-time system notification.
     * Support for "Pending Invitations" to bind users who register with Google post-event creation.
+* **Event Editing (Admin only):**
+    * The event Admin can edit event metadata (name, date range, location label, and coordinates) at any time while the event status is `PRE_TRIP`.
+    * Editing is locked once the event transitions to `ON_GOING` to preserve scoring integrity.
+    * The Edit screen reuses the same form as creation, pre-populated with the current values.
 * **Dashboard Split UI (`HomeScreen`):**
     * **Active Section:** Displays exactly one (1) primary live event in progress.
     * **Past Events Feed:** Displays finished historical events in a read-only "Viewer Mode" explicitly highlighting the final MVP winner badge (mvpId).
@@ -49,7 +56,11 @@
 * **Emergency Vote / Basic Services ("Cláusula Hospitalaria / Policía"):**
     * **Instant Crowd-Panic:** Any user can trigger this override, targeting one participant (not themselves).
     * **Democratic Cross-App Pop-up:** Fires a blocking notification overlay to all connected devices. Users must choose to Accept or Cancel.
-    * **Instant Match Point Victory:** If the absolute majority votes "Yes", the voting freezes, the event hits emergency shutdown, and the targeted user gets a massive point payload (`+1000.0 pts`) to win the preliminary board instantly.
+    * **Instant Match Point Victory:** If the absolute majority votes "Yes":
+        * The targeted user is awarded `+1000.0 pts` on the scoreboard.
+        * The event status jumps **directly to `FINISHED`**, bypassing `VOTING_PHASE` entirely.
+        * The targeted user is written as `mvpId` — no blind ballot takes place.
+        * Prediction resolution runs automatically using the same logic as a normal ending — both badges check against `mvpId`.
 
 ### 🔴 Sprint 4: The Final Awards Gala & Certification Engine
 * **The Blind Ballot & Scoring Context:**
@@ -61,9 +72,20 @@
 * **Diploma Export System: Dynamic composable layout generating localized custom awards containing profile data, performance stats, and the gala photo uploaded at the end (if available, otherwise it renders clean without it). The winner can download it locally as a PDF/PNG anytime.**
 
 ### 🔵 Sprint 5: Hall of Fame & Global Standings
-* **Leaderboard Dashboard:** Aggregate historical leaderboard computing performance points, total lifetime MVPs, and win ratios across all past events.
-* **User Profile File:** Personalized profiles providing rapid review and re-download capability for all unlocked digital diplomas.
+* **Leaderboard Dashboard:** Single screen with a tab selector — **[ MVP ] [ Oracle ] [ Triple ]** — each tab re-sorts the same participant list by the corresponding stat field. Scoped to users from events the current user has participated in (not global strangers).
+* **User Profile Screen:** Displays badge icons with counters (🏆 ×3 · 🔮 ×2 · 🎯 ×1). Tapping any badge icon opens a bottom sheet listing each individual earn with the event name and date, sourced from the `/users/{userId}/badges` subcollection.
 * **Archive Viewer Mode:** Past events can be opened by any participant in a read-only viewer mode, maintaining full access to the live timeline texts, photos, and historical graphs.
+* **Diploma Re-download:** Rapid re-download capability for all previously generated digital diplomas from the profile screen.
+
+### 🟣 Sprint 6: Polish & Branding
+* **App Icon:** Final launcher icon (adaptive icon for Android 8+, including foreground, background, and monochrome layers).
+* **Color System:** Define the full Material 3 color scheme (primary, secondary, tertiary, error, surface tokens) for both light and dark themes.
+* **Typography:** Finalize font family and type scale across all text styles (`displayLarge` → `labelSmall`).
+* **Images & Illustrations:** Onboarding visuals, empty state illustrations, and any decorative assets.
+* **Sounds & Haptics:** Audio feedback for key moments (emergency clause triggered, MVP awarded, diploma generated) and haptic patterns.
+* **Animations & Transitions:** Screen transitions, loading skeletons, and micro-interactions (e.g. score counter animating up, emergency overlay entrance).
+* **Dark Mode:** Verify all screens against the dark theme token set and fix any contrast or visibility issues.
+* **String & Localization Audit:** Final pass over all string resources to ensure EN and ES are complete and consistent.
 
 ---
 
@@ -86,12 +108,26 @@
   "createdAt": "TIMESTAMP"
 }
 ```
+#### `/users/{userId}/badges/{badgeId}`
+```json
+{
+  "type": "STRING (MVP | ORACLE | TRIPLE)",
+  "eventId": "STRING",
+  "eventTitle": "STRING (denormalized — avoids joining events collection at display time)",
+  "earnedAt": "TIMESTAMP"
+}
+```
 #### `/events/{eventId}`
 ```json
 {
   "eventId": "STRING (Primary Key)",
   "title": "STRING",
+  "locationLabel": "STRING (Nullable — user-defined place name)",
+  "latitude": "NUMBER (Nullable)",
+  "longitude": "NUMBER (Nullable)",
   "status": "STRING (PRE_TRIP | ON_GOING | VOTING_PHASE | FINISHED)",
+  // Normal flow:    PRE_TRIP → ON_GOING → VOTING_PHASE → FINISHED
+  // Emergency path: PRE_TRIP → ON_GOING → FINISHED (mvpId = emergency target, bypasses vote)
   "adminId": "STRING",
   "participants": ["STRING (User UIDs)"],
   "mvpId": "STRING (Nullable)",
@@ -161,5 +197,5 @@ storage/
 | Achievement | Tracking Logic                                               | Profile Impact  |
 | :--- |:-------------------------------------------------------------|:----------------|
 | **Event MVP Winner** | Highest live score tracker or emergency clause recipent      | +1 Lifetime MVP |
-| **Oracle Badge** | Pre-trip prediction matched the final MVP winner             | +1 Oracle Win   |
-| **The Triple Badge** | Pre-trip wildcard participant guess matched the final metric | +1 Triple Win   |
+| **Oracle Badge** | `projectedMvpId == mvpId` (normal or emergency path)         | +1 Oracle Win   |
+| **The Triple Badge** | `tripleBetParticipantId == mvpId` (normal or emergency path) | +1 Triple Win   |

@@ -1,9 +1,18 @@
 <resources>
     <string name="app_name">MVP</string>
 
-    <!-- Auth Feature Strings (English - Default) -->
+    <!-- Auth Feature Strings -->
     <string name="login_welcome_title">Welcome to MVP!</string>
     <string name="login_welcome_subtitle">Sign in quickly and securely with your Google account.</string>
     <string name="login_google_btn_text">Sign in with Google</string>
     <string name="login_google_btn_accessibility">Google Sign-In Button</string>
+
+    <!-- Splash Feature Strings -->
+    <string name="splash_checking_auth">Checking authentication…</string>
+
+    <!-- Home Feature Strings -->
+    <string name="home_welcome_greeting">Welcome back,</string>
+    <string name="home_profile_photo_accessibility">Profile photo — tap to open menu</string>
+    <string name="home_menu_sign_out">Sign Out</string>
+    <string name="home_dashboard_placeholder">Dashboard coming soon</string>
 </resources>

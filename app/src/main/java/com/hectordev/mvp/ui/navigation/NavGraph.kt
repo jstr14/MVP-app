@@ -45,7 +45,14 @@ fun AppNavGraph(
         }
 
         composable<AppDestination.Home> {
-            HomeScreen()
+            HomeScreen(
+                onLogout = {
+                    authViewModel.signOut()
+                    navController.navigate(AppDestination.Login) {
+                        popUpTo(AppDestination.Home) { inclusive = true }
+                    }
+                }
+            )
         }
     }
 }

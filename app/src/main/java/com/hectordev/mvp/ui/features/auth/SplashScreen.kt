@@ -7,17 +7,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import kotlinx.coroutines.delay
+import androidx.compose.ui.res.stringResource
+import com.hectordev.mvp.R
 
 @Composable
 fun SplashScreen(onNavigationRequested: () -> Unit) {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text("Splash Screen (Checking Auth...)")
+        Text(stringResource(R.string.splash_checking_auth))
     }
 
-    // Simulate an auth check delay, then proceed
     LaunchedEffect(Unit) {
-        delay(2000)
         onNavigationRequested()
     }
 }

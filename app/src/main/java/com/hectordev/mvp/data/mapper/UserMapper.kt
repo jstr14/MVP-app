@@ -1,9 +1,9 @@
 package com.hectordev.mvp.data.mapper
 
-import com.hectordev.mvp.data.domain.UserDataModel
+import com.hectordev.mvp.data.model.UserDto
 import com.hectordev.mvp.domain.User
 
-fun UserDataModel.toDomain(): User {
+fun UserDto.toDomain(): User {
     return User(
         id = id,
         name = name,
@@ -14,8 +14,8 @@ fun UserDataModel.toDomain(): User {
     )
 }
 
-fun User.toDataModel(): UserDataModel {
-    return UserDataModel(
+fun User.toDto(): UserDto {
+    return UserDto(
         id = id,
         name = name,
         email = email,

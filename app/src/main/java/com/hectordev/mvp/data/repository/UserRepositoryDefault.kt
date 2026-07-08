@@ -1,8 +1,9 @@
 package com.hectordev.mvp.data.repository
 
 import com.google.firebase.firestore.FirebaseFirestore
-import com.hectordev.mvp.data.domain.UserDataModel
-import com.hectordev.mvp.data.mapper.toDataModel
+import com.google.firebase.firestore.SetOptions
+import com.hectordev.mvp.data.model.UserDto
+import com.hectordev.mvp.data.mapper.toDto
 import com.hectordev.mvp.data.mapper.toDomain
 import com.hectordev.mvp.domain.User
 import com.hectordev.mvp.domain.repository.UserRepository
@@ -21,10 +22,7 @@ class UserRepositoryDefault @Inject constructor(
     override suspend fun getCurrentUser(userId: String): User? {
         return try {
             val document = usersCollection.document(userId).get().await()
-            // Convert firebase document to datamodel o object
-            val dataModel = document.toObject(UserDataModel::class.java)
-            // transform it to domain model before return it
-            dataModel?.toDomain()
+            document.toObject(UserDto::class.java)?.toDomain()
         } catch (e: Exception) {
             null
         }
@@ -32,9 +30,9 @@ class UserRepositoryDefault @Inject constructor(
 
     override suspend fun saveUser(user: User) {
         try {
-            // Transform model from domain to datamodel for Firebase
-            val dataModel = user.toDataModel()
-            usersCollection.document(dataModel.id).set(dataModel).await()
+            val dto = user.toDto()
+            // merge = true preserves existing stats fields on returning users
+            usersCollection.document(dto.id).set(dto, SetOptions.merge()).await()
         } catch (e: Exception) {
         }
     }
@@ -47,7 +45,7 @@ class UserRepositoryDefault @Inject constructor(
             }
 
             val users = snapshot?.documents?.mapNotNull { doc ->
-                doc.toObject(UserDataModel::class.java)?.toDomain()
+                doc.toObject(UserDto::class.java)?.toDomain()
             } ?: emptyList()
 
             trySend(users)

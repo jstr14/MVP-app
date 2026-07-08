@@ -84,6 +84,7 @@ dependencies {
 
     // Credential Manager for Google Login
     implementation(libs.credentials)
+    implementation(libs.credentials.play.services.auth)
     implementation(libs.google.id)
 
     // Hilt
@@ -94,4 +95,7 @@ dependencies {
     // Navigation
     implementation(libs.androidx.navigation.compose)
     implementation(libs.kotlinx.serialization.json)
+
+    // Coil - async image loading
+    implementation(libs.coil.compose)
 }
