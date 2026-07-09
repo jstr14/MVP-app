@@ -13,4 +13,10 @@ sealed interface AppDestination {
 
     @Serializable
     data object Home : AppDestination
+
+    @Serializable
+    data object CreateEvent : AppDestination
+
+    @Serializable
+    data class EventDetails(val eventId: String) : AppDestination
 }

@@ -1,5 +1,6 @@
 package com.hectordev.mvp.data.repository
 
+import com.google.firebase.firestore.FieldPath
 import com.google.firebase.firestore.FirebaseFirestore
 import com.hectordev.mvp.data.domain.UserDataModel
 import com.hectordev.mvp.data.mapper.toDataModel
@@ -31,12 +32,34 @@ class UserRepositoryDefault @Inject constructor(
     }
 
     override suspend fun saveUser(user: User) {
-        try {
-            // Transform model from domain to datamodel for Firebase
-            val dataModel = user.toDataModel()
-            usersCollection.document(dataModel.id).set(dataModel).await()
+        val dataModel = user.toDataModel()
+        usersCollection.document(dataModel.id).set(dataModel).await()
+    }
+
+    override suspend fun getUsersByIds(ids: List<String>): List<User> {
+        if (ids.isEmpty()) return emptyList()
+        return try {
+            usersCollection
+                .whereIn(FieldPath.documentId(), ids)
+                .get()
+                .await()
+                .documents
+                .mapNotNull { it.toObject(UserDataModel::class.java)?.toDomain() }
         } catch (e: Exception) {
+            emptyList()
         }
+    }
+
+    override suspend fun getUserByEmail(email: String): User? {
+        return usersCollection
+            .whereEqualTo("email", email)
+            .limit(1)
+            .get()
+            .await()
+            .documents
+            .firstOrNull()
+            ?.toObject(UserDataModel::class.java)
+            ?.toDomain()
     }
 
     override fun getAllUsers(): Flow<List<User>> = callbackFlow {

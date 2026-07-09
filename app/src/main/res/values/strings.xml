@@ -1,9 +1,98 @@
 <resources>
     <string name="app_name">MVP</string>
 
-    <!-- Auth Feature Strings (English - Default) -->
+    <!-- Auth Feature Strings -->
     <string name="login_welcome_title">Welcome to MVP!</string>
     <string name="login_welcome_subtitle">Sign in quickly and securely with your Google account.</string>
     <string name="login_google_btn_text">Sign in with Google</string>
     <string name="login_google_btn_accessibility">Google Sign-In Button</string>
+
+    <!-- Splash Feature Strings -->
+    <string name="splash_checking_auth">Checking authentication…</string>
+
+    <!-- Home Feature Strings -->
+    <string name="home_welcome_greeting">Welcome back,</string>
+    <string name="home_profile_photo_accessibility">Profile photo — tap to open menu</string>
+    <string name="home_menu_sign_out">Sign Out</string>
+    <string name="home_dashboard_placeholder">Dashboard coming soon</string>
+    <string name="home_create_event_fab_accessibility">Create new event</string>
+    <string name="home_event_created_success">Event created successfully!</string>
+    <string name="home_section_active_event">Active Event</string>
+    <string name="home_section_past_events">Past Events</string>
+    <string name="home_no_active_event">No active event. Tap + to create one.</string>
+    <string name="home_status_pre_trip">Planning</string>
+    <string name="home_status_prediction">Predictions</string>
+    <string name="home_status_on_going">Live</string>
+    <plurals name="home_event_participants">
+        <item quantity="one">%d participant</item>
+        <item quantity="other">%d participants</item>
+    </plurals>
+    <string name="home_delete_event">Delete event</string>
+    <string name="home_delete_event_confirm_title">Delete event?</string>
+    <string name="home_delete_event_confirm_message">This action cannot be undone.</string>
+    <string name="home_delete_event_btn">Delete</string>
+    <string name="home_cancel">Cancel</string>
+    <string name="home_section_pending_invitations">Pending Invitations</string>
+    <string name="home_section_upcoming_events">Upcoming Events</string>
+    <string name="home_pending_accept">Accept</string>
+    <string name="home_pending_decline">Decline</string>
+    <string name="home_upcoming_locked_message">Available when your current event ends</string>
+
+    <!-- Event Details Feature Strings -->
+    <string name="event_details_section_participants">Participants</string>
+    <string name="event_details_admin_badge">Admin</string>
+    <string name="event_details_open_predictions_btn">Open Predictions</string>
+    <string name="event_details_open_predictions_confirm_title">Open predictions?</string>
+    <string name="event_details_open_predictions_confirm_message">Pending invitations will be cancelled and the participant pool will be locked. All confirmed participants will be able to submit their picks.</string>
+    <string name="event_details_open_predictions_confirm_btn">Open</string>
+    <string name="event_details_start_event_btn">Start Event</string>
+    <string name="event_details_start_confirm_title">Start event?</string>
+    <string name="event_details_start_confirm_message">Predictions will be frozen and the event will go live. This cannot be undone.</string>
+    <string name="event_details_start_confirm_btn">Start</string>
+    <string name="event_details_invite_participant_btn">Invite participant</string>
+    <string name="event_details_invite_dialog_title">Invite a friend</string>
+    <string name="event_details_invite_email_label">Email address</string>
+    <string name="event_details_invite_email_placeholder">friend@example.com</string>
+    <string name="event_details_invite_btn">Invite</string>
+    <string name="event_details_invite_error_not_found">No user found with that email</string>
+    <string name="event_details_invite_error_already_member">This user is already in the event</string>
+    <string name="event_details_invite_error_unknown">Something went wrong. Please try again.</string>
+    <string name="event_details_section_pending">Pending Invitations</string>
+    <string name="event_details_pending_badge">Pending</string>
+    <string name="event_details_remove_participant">Remove participant</string>
+    <string name="event_details_section_prediction">Your Prediction</string>
+    <string name="event_details_prediction_not_submitted">Tap to submit your predictions</string>
+    <string name="event_details_prediction_submit_title">Submit your prediction</string>
+    <string name="event_details_prediction_update_title">Update your prediction</string>
+    <string name="event_details_prediction_mvp_label">MVP</string>
+    <string name="event_details_prediction_mvp_description">Who do you think will be crowned MVP?</string>
+    <string name="event_details_prediction_triple_label">Triple</string>
+    <string name="event_details_prediction_triple_description">Your wildcard bet</string>
+    <string name="event_details_prediction_select_placeholder">Select a participant</string>
+    <string name="event_details_prediction_submit_btn">Submit Prediction</string>
+    <string name="event_details_prediction_update_btn">Update Prediction</string>
+    <string name="event_details_prediction_mvp_pick">MVP: %s</string>
+    <string name="event_details_prediction_triple_pick">Triple: %s</string>
+    <string name="event_details_prediction_success">Prediction saved successfully!</string>
+
+    <!-- Create Event Feature Strings -->
+    <string name="create_event_screen_title">Create Event</string>
+    <string name="create_event_name_label">Event name *</string>
+    <string name="create_event_name_placeholder">e.g. Summer Trip 2025</string>
+    <string name="create_event_start_date_label">Start date *</string>
+    <string name="create_event_end_date_label">End date *</string>
+    <string name="create_event_error_name_required">Event name is required</string>
+    <string name="create_event_error_start_date_required">Please select a start date</string>
+    <string name="create_event_error_end_date_required">Please select an end date</string>
+    <string name="create_event_error_end_date_invalid">End date must be after start date</string>
+    <string name="create_event_error_end_date_past">End date cannot be in the past</string>
+    <string name="create_event_select_date">Select a date</string>
+    <string name="create_event_location_label">Location (optional)</string>
+    <string name="create_event_location_placeholder">e.g. Beach house, Ibiza</string>
+    <string name="create_event_use_location_btn">Use current location</string>
+    <string name="create_event_location_captured">Location captured</string>
+    <string name="create_event_clear_location_btn">Clear</string>
+    <string name="create_event_btn">Create Event</string>
+    <string name="create_event_date_picker_ok">OK</string>
+    <string name="create_event_date_picker_cancel">Cancel</string>
 </resources>

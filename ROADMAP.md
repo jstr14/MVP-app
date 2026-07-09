@@ -10,7 +10,7 @@
 * **Asynchronous Flow:** Kotlin Coroutines & Asynchronous StateFlows
 * **Dependency Injection:** Hilt
 * **Navigation:** Navigation Compose + `kotlinx.serialization` for type-safe routing
-* **Backend Suite:** Firebase (Auth, Cloud Firestore, Cloud Storage, Cloud Messaging)
+* **Backend Suite:** Firebase (Auth, Cloud Firestore, Cloud Storage, Cloud Messaging, Cloud Functions)
 * **Data Serialization & Time:** `kotlinx.serialization` + `kotlinx-datetime`
 * **Data Visualization:** Vico Charts
 
@@ -18,25 +18,39 @@
 
 ## 🗺️ Execution Milestones (Sprints)
 
-### 🟢 Sprint 1: Architecture, Authentication, and Identity Core
+### 🟢 Sprint 1: Architecture, Authentication, and Identity Core ✅
 * **Project Setup:** Integrate Hilt, Jetpack Compose, Type-Safe Navigation, and Serialization.
-* **Domain Layer:** Define explicit interface blueprints for Repositories (`AuthRepository`, `EventsRepository`, `StorageRepository`).
+* **Domain Layer:** Define explicit interface blueprints for Repositories (`AuthRepository`, `EventsRepository`, `UserRepository`).
 * **Authentication:** Implement modern Android `Credential Manager` API for seamless Google Sign-In bottom-sheet flows.
-* **User Profile Sync:** On first-time Google logins, upsert user payload data (`uid`, `displayName`, `email`, `photoUrl`) into the `/users` Firestore directory.
+* **User Profile Sync:** On every Google login, upsert user payload data (`uid`, `name`, `email`, `photoUrl`) into the `/users` Firestore directory via `AuthViewModel`. This ensures the user is always discoverable by email for the invite system.
 * **Reactive Router System:** Maintain a global `NavHost` state router branching dynamically: `Splash` ➡️ `Login` ➡️ `Home (Dashboard)` ➡️ `EventDetails`.
 
 ### 🟡 Sprint 2: Event Lifecycle Management & Pre-Trip Strategy
-* **Event Creation Log:**
-    * Create events containing metadata: name, date range, and an initial user roles.
-    * Friend lookup feature using exact email matching queries directly targeting the `/users` collection. Inviting participants pushes a real-time system notification.
-    * Support for "Pending Invitations" to bind users who register with Google post-event creation.
-* **Dashboard Split UI (`HomeScreen`):**
-    * **Active Section:** Displays exactly one (1) primary live event in progress.
-    * **Past Events Feed:** Displays finished historical events in a read-only "Viewer Mode" explicitly highlighting the final MVP winner badge (mvpId).
-* **The "Triple" Prediction Setup:**
-    * Once the Admin closes the participant pool, all active players must submit a pre-trip prophecy.
-    * Inputs required: Projected Event MVP Winner + "The Triple" (A high-stakes wildcard prediction, chosen exclusively from the finalized list of event participants).
-    * System Admin switches state to `ON_GOING` to freeze predictions and start the live event.
+* **Event Creation:** ✅ Create events with metadata: name, date range, optional location. Creator is automatically added as first participant and admin.
+* **Event Details Screen:** ✅ Dedicated screen showing event status, date range, location, confirmed participants, and pending invitations (visible to all). Admin-only actions (invite, remove, start) are gated behind role checks.
+* **Participant Invite System:** ✅
+    * Admin searches by exact email — querying the `/users` collection directly.
+    * **Registered user found:** UID added to `pendingParticipants[]` immediately.
+    * **Unregistered email:** Email stored in `pendingEmails[]`. On the user's first login, the system automatically binds their UID — moving them from `pendingEmails` to `pendingParticipants`.
+    * Admin can remove confirmed participants and cancel pending invitations (UID or email) during `PRE_TRIP`.
+* **Push Notification on Invite:** When a user is added to `pendingParticipants[]`, a Firebase Cloud Function triggers an FCM push notification to the invited user's device, so they are immediately aware of the invitation without needing to open the app.
+* **Dashboard Split UI (`HomeScreen`):** Four sections in order:
+    * **Active Event:** ✅ Exactly one (1) live event the user can fully interact with. FAB to create a new event is hidden while an active event exists.
+    * **Pending Invitations:** ✅ Events where the user is in `pendingParticipants[]`. Each card shows event info and Accept / Decline buttons. Accepting moves the user from `pendingParticipants[]` to `participants[]`. No navigation into the event until accepted.
+    * **Upcoming Events:** ✅ Events where the user is in `participants[]` but already has an active event. Read-only cards with a lock indicator — navigation is blocked until the active event ends. Activates automatically once the current event finishes.
+    * **Past Events Feed:** ✅ Finished events in read-only Viewer Mode showing MVP winner badge (only shown if the current user won).
+* **Open Predictions:** ✅ Admin-only action in the `EventDetailsScreen` TopAppBar (visible during `PRE_TRIP`). Transitions the event from `PRE_TRIP` to `PREDICTION`.
+    * Atomically clears `pendingParticipants[]` and `pendingEmails[]` — pending users missed their window.
+    * Participant pool is now final and frozen. All confirmed participants receive a push notification to submit their picks (Firebase Cloud Function + FCM).
+* **Start Event:** ✅ Admin-only action in the `EventDetailsScreen` TopAppBar (visible during `PREDICTION`). Transitions the event from `PREDICTION` to `ON_GOING`, freezing all submitted predictions.
+    * Participants who never submitted a prediction forfeit Oracle/Triple badge eligibility for this event. No late submissions allowed once `ON_GOING`.
+* **The "Triple" Prediction Setup:** ✅
+    * Available to all confirmed participants during `PREDICTION` state.
+    * Inputs required: Projected Event MVP Winner + "The Triple" (A high-stakes wildcard prediction, chosen exclusively from the finalized `participants[]` — self-selection locked).
+    * **Prediction visibility rules:**
+        * `PREDICTION`: each user sees and can edit only their own prediction. Others' are hidden.
+        * `ON_GOING`: your prediction is shown in read-only mode inside `EventDetailsScreen` as a personal reminder card. Others' still hidden.
+        * `VOTING_PHASE` / `FINISHED`: full reveal of all predictions alongside the final results in the gala screen.
 
 ### 🟠 Sprint 3: The Live Event Feed (Real-Time Lore & Micro-Scoring)
 * **Chronological Multimedia Wall:** Live Firestore snapshots (`addSnapshotListener`) feeding a real-time, highly synchronized chronological timeline across all participant devices.
@@ -75,7 +89,7 @@
 ```json
 {
   "uid": "STRING (Primary Key)",
-  "displayName": "STRING",
+  "name": "STRING",
   "email": "STRING",
   "photoUrl": "STRING",
   "stats": {
@@ -91,9 +105,16 @@
 {
   "eventId": "STRING (Primary Key)",
   "title": "STRING",
-  "status": "STRING (PRE_TRIP | ON_GOING | VOTING_PHASE | FINISHED)",
+  "status": "STRING (PRE_TRIP | PREDICTION | ON_GOING | VOTING_PHASE | FINISHED)",
   "adminId": "STRING",
-  "participants": ["STRING (User UIDs)"],
+  "startDate": "TIMESTAMP",
+  "endDate": "TIMESTAMP",
+  "locationLabel": "STRING (Nullable)",
+  "latitude": "NUMBER (Nullable)",
+  "longitude": "NUMBER (Nullable)",
+  "participants": ["STRING (User UIDs — confirmed, active)"],
+  "pendingParticipants": ["STRING (User UIDs — invited, awaiting response)"],
+  "pendingEmails": ["STRING (Emails of invited users not yet registered)"],
   "mvpId": "STRING (Nullable)",
   "galaPhotoUrl": "STRING (Nullable)",
   "activeEmergencyId": "STRING (Nullable)",
@@ -104,7 +125,7 @@
 ```json
 {
   "projectedMvpId": "STRING (User UID)",
-  "tripleBetParticipantId": "STRING (User UID chosen from participant pool)"
+  "tripleParticipantId": "STRING (User UID chosen from participant pool)"
 }
 ```
 #### `/events/{eventId}/emergency_requests/{requestId}`
