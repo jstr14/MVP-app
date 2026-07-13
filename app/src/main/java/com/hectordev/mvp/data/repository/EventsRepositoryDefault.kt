@@ -2,6 +2,7 @@ package com.hectordev.mvp.data.repository
 
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
 import com.hectordev.mvp.data.mapper.toDomain
 import com.hectordev.mvp.data.mapper.toDto
 import com.hectordev.mvp.data.model.EventDto
@@ -161,7 +162,7 @@ class EventsRepositoryDefault @Inject constructor(
     override fun observeTimeline(eventId: String): Flow<List<TimelineNote>> = callbackFlow {
         val subscription = eventsCollection.document(eventId)
             .collection("points_log")
-            .orderBy("timestamp")
+            .orderBy("timestamp", Query.Direction.DESCENDING)
             .addSnapshotListener { snapshot, error ->
                 if (error != null) { close(error); return@addSnapshotListener }
                 val notes = snapshot?.documents

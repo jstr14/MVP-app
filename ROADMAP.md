@@ -57,7 +57,7 @@
 #### Screen Layout
 The Live Event Feed is a single screen with the following structure:
 * **TopAppBar:** Event title in the center. Actions on the right: `ℹ️` icon (navigates to Event Details — participants, predictions, event info) and a `Graph` text button (navigates to the Points Progression Graph screen). The `⚡` Emergency Clause button is deferred to a future implementation. No persistent scoreboard banner — the feed cards communicate score changes in real time.
-* **Timeline:** Full-height `LazyColumn` of chronological note cards.
+* **Timeline:** Full-height `LazyColumn` of note cards ordered by most recent first (descending timestamp).
 * **FAB:** `+ Post` button anchored to the bottom right, opens the Compose Bottom Sheet.
 
 #### Navigation Rules
@@ -76,9 +76,11 @@ Each card displays:
 #### Compose Bottom Sheet (tier-first flow)
 1. **Tier selection** — four options always displaying label and point value together: `Fact +1`, `Hot Take +2`, `Witnessed +5`, `Lore +10`.
 2. **Target selection** — horizontal chip row of all participants, self excluded.
-3. **Content type** — `📷 Photo`, `GIF`, `✏️ Text` (Photo and GIF deferred to later phases).
-4. **Content input** — text field or media picker depending on type selected.
-5. **Post button.**
+3. **Text input** — optional multiline field, always visible.
+4. **Media attachment** — `📷 Camera` and `🖼 Gallery` buttons. Mutually exclusive with each other but combinable with text. When a photo is selected a preview thumbnail is shown with an `✕` to remove it. GIF attachment is deferred pending Giphy API key setup.
+5. **Post button** — enabled when tier + target are selected AND at least one of (text is not blank OR a media attachment is present).
+
+**Note type resolution:** `PHOTO` if a photo is attached (regardless of whether text is also present), `GIF` if a GIF is attached, `TEXT` if text only. Both `textContent` and `contentUrl` can be populated simultaneously on the same note.
 
 #### Feature implementations
 * ✅ **Chronological Multimedia Wall:** Live Firestore snapshots (`addSnapshotListener`) feeding a real-time, highly synchronized chronological timeline across all participant devices.
