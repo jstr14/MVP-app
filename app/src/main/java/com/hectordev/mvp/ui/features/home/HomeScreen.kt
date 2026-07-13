@@ -55,7 +55,7 @@ fun HomeScreen(
     modifier: Modifier = Modifier,
     onLogout: () -> Unit,
     onCreateEvent: () -> Unit,
-    onEventClick: (eventId: String) -> Unit = {},
+    onEventClick: (eventId: String, status: EventStatus) -> Unit = { _, _ -> },
     showEventCreatedMessage: Boolean = false,
     onEventCreatedMessageShown: () -> Unit = {},
     viewModel: HomeViewModel = hiltViewModel()
@@ -93,7 +93,7 @@ private fun HomeScreenContent(
     onEventCreatedMessageShown: () -> Unit = {},
     onLogout: () -> Unit,
     onCreateEvent: () -> Unit,
-    onEventClick: (eventId: String) -> Unit = {},
+    onEventClick: (eventId: String, status: EventStatus) -> Unit = { _, _ -> },
     onDeleteActiveEvent: () -> Unit,
     onAcceptInvitation: (String) -> Unit = {},
     onDeclineInvitation: (String) -> Unit = {},
@@ -247,7 +247,7 @@ private fun HomeScreenContent(
                         item = uiState.activeEvent,
                         isAdmin = uiState.activeEvent.event.adminId == uiState.currentUserId,
                         onDelete = onDeleteActiveEvent,
-                        onClick = { onEventClick(uiState.activeEvent.event.id) }
+                        onClick = { onEventClick(uiState.activeEvent.event.id, uiState.activeEvent.event.status) }
                     )
                 } else {
                     Text(
@@ -380,7 +380,7 @@ private fun HomeScreenAllSectionsPreview() {
                 uiState = previewUiState,
                 onLogout = {},
                 onCreateEvent = {},
-                onEventClick = {},
+                onEventClick = { _, _ -> },
                 onDeleteActiveEvent = {}
             )
         }
@@ -401,7 +401,7 @@ private fun HomeScreenNoActiveEventPreview() {
                 ),
                 onLogout = {},
                 onCreateEvent = {},
-                onEventClick = {},
+                onEventClick = { _, _ -> },
                 onDeleteActiveEvent = {}
             )
         }

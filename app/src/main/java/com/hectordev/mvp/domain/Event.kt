@@ -16,5 +16,6 @@ data class Event(
     val mvpId: String? = null,
     val galaPhotoUrl: String? = null,
     val activeEmergencyId: String? = null,
+    val usedEmergencyClause: List<String> = emptyList(),
     val createdAt: Long = 0L
 )

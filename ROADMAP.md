@@ -56,36 +56,42 @@
 
 #### Screen Layout
 The Live Event Feed is a single screen with the following structure:
-* **TopAppBar:** Event title on the left. Two action icons on the right: `📊` (navigates to the Points Progression Graph screen) and `⚡` (triggers the Emergency Clause). No persistent scoreboard banner — the feed cards communicate score changes in real time.
+* **TopAppBar:** Event title in the center. Actions on the right: `ℹ️` icon (navigates to Event Details — participants, predictions, event info) and a `Graph` text button (navigates to the Points Progression Graph screen). The `⚡` Emergency Clause button is deferred to a future implementation. No persistent scoreboard banner — the feed cards communicate score changes in real time.
 * **Timeline:** Full-height `LazyColumn` of chronological note cards.
 * **FAB:** `+ Post` button anchored to the bottom right, opens the Compose Bottom Sheet.
+
+#### Navigation Rules
+* **`PRE_TRIP` / `PREDICTION`:** Opening an event from Home navigates to `EventDetailsScreen`. LiveFeed is not accessible yet.
+* **`ON_GOING`:** Opening an event from Home navigates directly to `LiveFeedScreen`. When the admin taps "Start Event" in EventDetails, the app auto-navigates to LiveFeed and pops EventDetails off the back stack (back → Home).
+* **EventDetails during `ON_GOING`:** Accessible from LiveFeed via the `ℹ️` TopAppBar icon for reviewing participants and predictions. Back from EventDetails returns to LiveFeed.
 
 #### Note Card anatomy
 Each card displays:
 * Author avatar + name → Target avatar + name (both shown)
 * Tier badge with label and point value (e.g., `HOT TAKE +2 pts`)
 * Note content (text, photo, or GIF)
-* Emoji reaction counts + timestamp
+* Timestamp
+* Delete button — visible to the Event Admin (can delete any note) and to the note's author (can delete their own notes only). Deleting a note subtracts its tier points from the targeted user's score in real time.
 
 #### Compose Bottom Sheet (tier-first flow)
 1. **Tier selection** — four options always displaying label and point value together: `Fact +1`, `Hot Take +2`, `Witnessed +5`, `Lore +10`.
 2. **Target selection** — horizontal chip row of all participants, self excluded.
-3. **Content type** — `📷 Photo`, `GIF`, `✏️ Text`.
+3. **Content type** — `📷 Photo`, `GIF`, `✏️ Text` (Photo and GIF deferred to later phases).
 4. **Content input** — text field or media picker depending on type selected.
 5. **Post button.**
 
 #### Feature implementations
-* **Chronological Multimedia Wall:** Live Firestore snapshots (`addSnapshotListener`) feeding a real-time, highly synchronized chronological timeline across all participant devices.
-* **Multimedia Capture:** Direct Firebase Storage integration for quick-snapping photos embedded within live notes.
-* **Giphy SDK Core:** In-app GIF selection interface allowing users to react visually to real-time group highlights.
-* **Points Progression Graph Screen:** Dedicated screen accessible via the `📊` TopAppBar icon. Displays a line chart (Vico Charts) tracking each participant's score over time throughout the event.
-* **Peer-Driven Scoring System:**
+* ✅ **Chronological Multimedia Wall:** Live Firestore snapshots (`addSnapshotListener`) feeding a real-time, highly synchronized chronological timeline across all participant devices.
+* **Multimedia Capture:** Direct Firebase Storage integration for quick-snapping photos embedded within live notes. *(deferred)*
+* **Giphy SDK Core:** In-app GIF selection interface allowing users to react visually to real-time group highlights. *(deferred)*
+* **Points Progression Graph Screen:** Dedicated screen accessible via the `Graph` TopAppBar text button. Displays a line chart (Vico Charts) tracking each participant's score over time throughout the event. *(deferred)*
+* ✅ **Peer-Driven Scoring System:**
     * **Event Log Feed:** Points are accumulated exclusively when a user publishes a timeline note (Text, Photo, or GIF) and explicitly targets/nominates another participant (self-targeting is locked).
     * **Tier Selection:** Before posting, the author picks a tier that defines the weight of the nomination. The label and point value are always shown together. Four tiers available: **Fact** (+1), **Hot Take** (+2), **Witnessed** (+5), **Lore** (+10). Tier labels are subject to change and the system may expand in future iterations.
     * **Note Card Display:** Each published note shows its tier label and point value so all participants can see the weight assigned.
     * **Social Interactions:** Other players can react with emojis on notes to build engagement, but reactions do not award additional points.
-    * **Admin Moderation Power:** The Event Admin has the authority to delete any post from the timeline. Deleting a post automatically subtracts the tier's assigned points from the targeted user's score in real time.
-* **Emergency Vote / Basic Services ("Cláusula Hospitalaria / Policía"):**
+    * **Note Deletion:** Admin can delete any note; the note's own author can also delete their own notes. Deletion subtracts the tier's assigned points from the targeted user's score in real time.
+* **Emergency Vote / Basic Services ("Cláusula Hospitalaria / Policía"):** *(deferred)*
     * **Instant Crowd-Panic:** Any user can trigger this override via the `⚡` TopAppBar icon, targeting one participant (not themselves).
     * **Democratic Cross-App Pop-up:** Fires a blocking overlay to all connected devices. Users must choose to Accept or Decline.
     * **Timeout:** If the vote is not resolved (accepted or declined by all participants) within **3 minutes**, the request is automatically discarded and no points are awarded.
@@ -93,8 +99,9 @@ Each card displays:
     * **One-Shot Rule:** If the majority votes "Decline" or the request times out, the user who triggered it permanently loses the ability to fire the Emergency Clause again for the remainder of this event.
 
 ### 🔴 Sprint 4: The Final Awards Gala & Certification Engine
+* **Closing the Live Event (Admin):** An admin-only "End Event" button in the `LiveFeedScreen` TopAppBar (with a confirmation dialog) transitions the event from `ON_GOING` to `VOTING_PHASE`. All participants' Firestore listeners detect the status change in real time and auto-navigate to the Voting/Gala screen.
 * **The Blind Ballot & Scoring Context:**
-  * **The Admin officially closes the live event. The app transitions to an interactive screen displaying the preliminary standings scoreboard (e.g., "Top 3 are John, Nancy, and Jack" or a full metrics table) alongside a line chart tracking the timeline performance.**
+  * **The app transitions to an interactive screen displaying the preliminary standings scoreboard (e.g., "Top 3 are John, Nancy, and Jack" or a full metrics table) alongside a line chart tracking the timeline performance.**
   * **Every user must cast a secret blind vote for the final winner (self-voting programmatically locked).**
 * **The Ultimate MVP Resolution: The official event MVP title is awarded strictly to the user who receives the most votes in this final ballot.**
 * **The Final Gala Upload: Once the vote is resolved, the group has the option to upload a final gala photo to Cloud Storage (gala_photo.jpg).**

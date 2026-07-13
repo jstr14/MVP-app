@@ -6,9 +6,11 @@ import com.hectordev.mvp.data.mapper.toDomain
 import com.hectordev.mvp.data.mapper.toDto
 import com.hectordev.mvp.data.model.EventDto
 import com.hectordev.mvp.data.model.PredictionDto
+import com.hectordev.mvp.data.model.TimelineNoteDto
 import com.hectordev.mvp.domain.Event
 import com.hectordev.mvp.domain.EventStatus
 import com.hectordev.mvp.domain.Prediction
+import com.hectordev.mvp.domain.TimelineNote
 import com.hectordev.mvp.domain.repository.EventsRepository
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -154,6 +156,30 @@ class EventsRepositoryDefault @Inject constructor(
                 trySend(events)
             }
         awaitClose { subscription.remove() }
+    }
+
+    override fun observeTimeline(eventId: String): Flow<List<TimelineNote>> = callbackFlow {
+        val subscription = eventsCollection.document(eventId)
+            .collection("points_log")
+            .orderBy("timestamp")
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) { close(error); return@addSnapshotListener }
+                val notes = snapshot?.documents
+                    ?.mapNotNull { it.toObject(TimelineNoteDto::class.java)?.toDomain() }
+                    ?: emptyList()
+                trySend(notes)
+            }
+        awaitClose { subscription.remove() }
+    }
+
+    override suspend fun postNote(eventId: String, note: TimelineNote): String {
+        val docRef = eventsCollection.document(eventId).collection("points_log").document()
+        docRef.set(note.copy(id = docRef.id).toDto()).await()
+        return docRef.id
+    }
+
+    override suspend fun deleteNote(eventId: String, noteId: String) {
+        eventsCollection.document(eventId).collection("points_log").document(noteId).delete().await()
     }
 
     override fun observePendingInvitations(userId: String): Flow<List<Event>> = callbackFlow {

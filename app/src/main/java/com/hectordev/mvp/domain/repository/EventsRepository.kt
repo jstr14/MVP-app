@@ -3,6 +3,7 @@ package com.hectordev.mvp.domain.repository
 import com.hectordev.mvp.domain.Event
 import com.hectordev.mvp.domain.EventStatus
 import com.hectordev.mvp.domain.Prediction
+import com.hectordev.mvp.domain.TimelineNote
 import kotlinx.coroutines.flow.Flow
 
 interface EventsRepository {
@@ -25,4 +26,7 @@ interface EventsRepository {
     fun observeEvent(eventId: String): Flow<Event?>
     fun observeParticipantEvents(userId: String): Flow<List<Event>>
     fun observePendingInvitations(userId: String): Flow<List<Event>>
+    fun observeTimeline(eventId: String): Flow<List<TimelineNote>>
+    suspend fun postNote(eventId: String, note: TimelineNote): String
+    suspend fun deleteNote(eventId: String, noteId: String)
 }

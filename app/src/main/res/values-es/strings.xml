@@ -73,6 +73,23 @@
     <string name="home_pending_decline">Rechazar</string>
     <string name="home_upcoming_locked_message">Disponible cuando termine tu evento actual</string>
 
+    <!-- Live Feed Feature Strings -->
+    <string name="live_feed_graph_btn">Gráfico</string>
+    <string name="live_feed_event_details_accessibility">Detalles del evento</string>
+    <string name="live_feed_post_note_accessibility">Publicar nota</string>
+    <string name="live_feed_empty_state">Todavía no hay notas. ¡Sé el primero en publicar!</string>
+    <string name="live_feed_delete_note_accessibility">Eliminar nota</string>
+    <string name="live_feed_compose_title">Nueva nota</string>
+    <string name="live_feed_compose_pick_tier">Elige un nivel</string>
+    <string name="live_feed_compose_nominate">¿A quién estás nominando?</string>
+    <string name="live_feed_compose_placeholder">Escribe algo…</string>
+    <string name="live_feed_compose_post_btn">Publicar</string>
+    <plurals name="live_feed_tier_points">
+        <item quantity="one">+%d pto</item>
+        <item quantity="other">+%d pts</item>
+    </plurals>
+    <string name="event_details_live_feed_btn">Feed en Directo</string>
+
     <!-- Create Event Feature Strings -->
     <string name="create_event_screen_title">Crear evento</string>
     <string name="create_event_name_label">Nombre del evento *</string>

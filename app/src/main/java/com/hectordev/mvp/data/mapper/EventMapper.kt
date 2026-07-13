@@ -21,6 +21,7 @@ fun EventDto.toDomain(): Event {
         mvpId = mvpId,
         galaPhotoUrl = galaPhotoUrl,
         activeEmergencyId = activeEmergencyId,
+        usedEmergencyClause = usedEmergencyClause,
         createdAt = createdAt
     )
 }
@@ -42,6 +43,7 @@ fun Event.toDto(): EventDto {
         mvpId = mvpId,
         galaPhotoUrl = galaPhotoUrl,
         activeEmergencyId = activeEmergencyId,
+        usedEmergencyClause = usedEmergencyClause,
         createdAt = createdAt
     )
 }

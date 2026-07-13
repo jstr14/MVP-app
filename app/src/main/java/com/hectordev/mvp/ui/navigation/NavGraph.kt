@@ -8,11 +8,14 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
+import com.hectordev.mvp.domain.EventStatus
 import com.hectordev.mvp.ui.features.auth.AuthViewModel
 import com.hectordev.mvp.ui.features.auth.LoginScreen
 import com.hectordev.mvp.ui.features.auth.SplashScreen
 import com.hectordev.mvp.ui.features.event.CreateEventScreen
 import com.hectordev.mvp.ui.features.event.EventDetailsScreen
+import com.hectordev.mvp.ui.features.feed.LiveFeedScreen
 import com.hectordev.mvp.ui.features.home.HomeScreen
 
 @Composable
@@ -64,14 +67,35 @@ fun AppNavGraph(
                 onCreateEvent = {
                     navController.navigate(AppDestination.CreateEvent)
                 },
-                onEventClick = { eventId ->
-                    navController.navigate(AppDestination.EventDetails(eventId))
+                onEventClick = { eventId, status ->
+                    if (status == EventStatus.ON_GOING) {
+                        navController.navigate(AppDestination.LiveFeed(eventId))
+                    } else {
+                        navController.navigate(AppDestination.EventDetails(eventId))
+                    }
                 }
             )
         }
 
-        composable<AppDestination.EventDetails> {
-            EventDetailsScreen(onBack = { navController.popBackStack() })
+        composable<AppDestination.EventDetails> { backStackEntry ->
+            val dest = backStackEntry.toRoute<AppDestination.EventDetails>()
+            EventDetailsScreen(
+                onBack = { navController.popBackStack() },
+                onGoToLiveFeed = {
+                    navController.navigate(AppDestination.LiveFeed(dest.eventId)) {
+                        popUpTo(AppDestination.EventDetails(dest.eventId)) { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        composable<AppDestination.LiveFeed> { backStackEntry ->
+            val dest = backStackEntry.toRoute<AppDestination.LiveFeed>()
+            LiveFeedScreen(
+                onBack = { navController.popBackStack() },
+                onGoToGraph = { /* TODO: navigate to graph screen */ },
+                onGoToDetails = { navController.navigate(AppDestination.EventDetails(dest.eventId)) }
+            )
         }
 
         composable<AppDestination.CreateEvent> {
