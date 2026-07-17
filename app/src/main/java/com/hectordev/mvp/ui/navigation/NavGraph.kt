@@ -16,6 +16,7 @@ import com.hectordev.mvp.ui.features.auth.SplashScreen
 import com.hectordev.mvp.ui.features.event.CreateEventScreen
 import com.hectordev.mvp.ui.features.event.EventDetailsScreen
 import com.hectordev.mvp.ui.features.feed.LiveFeedScreen
+import com.hectordev.mvp.ui.features.feed.ScoreGraphScreen
 import com.hectordev.mvp.ui.features.home.HomeScreen
 
 @Composable
@@ -93,9 +94,13 @@ fun AppNavGraph(
             val dest = backStackEntry.toRoute<AppDestination.LiveFeed>()
             LiveFeedScreen(
                 onBack = { navController.popBackStack() },
-                onGoToGraph = { /* TODO: navigate to graph screen */ },
+                onGoToGraph = { navController.navigate(AppDestination.ScoreGraph(dest.eventId)) },
                 onGoToDetails = { navController.navigate(AppDestination.EventDetails(dest.eventId)) }
             )
+        }
+
+        composable<AppDestination.ScoreGraph> {
+            ScoreGraphScreen(onBack = { navController.popBackStack() })
         }
 
         composable<AppDestination.CreateEvent> {

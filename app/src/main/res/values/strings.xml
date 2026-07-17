@@ -97,6 +97,14 @@
     </plurals>
     <string name="event_details_live_feed_btn">Live Feed</string>
 
+    <!-- Score Graph Feature Strings -->
+    <string name="score_graph_title">Score Graph</string>
+    <string name="score_graph_empty">No notes yet. Scores will appear here.</string>
+    <string name="score_graph_standings">Standings</string>
+    <string name="score_graph_pts">%d pts</string>
+    <string name="score_graph_axis_y">Points</string>
+    <string name="score_graph_axis_x">Notes</string>
+
     <!-- Create Event Feature Strings -->
     <string name="create_event_screen_title">Create Event</string>
     <string name="create_event_name_label">Event name *</string>

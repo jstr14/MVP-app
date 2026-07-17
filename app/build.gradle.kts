@@ -99,6 +99,9 @@ dependencies {
     // Giphy SDK
     implementation(libs.giphy)
 
+    // Vico Charts
+    implementation(libs.vico.compose.m3)
+
     // Location
     implementation(libs.play.services.location)
 

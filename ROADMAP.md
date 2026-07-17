@@ -86,7 +86,7 @@ Each card displays:
 * ✅ **Chronological Multimedia Wall:** Live Firestore snapshots (`addSnapshotListener`) feeding a real-time, highly synchronized chronological timeline across all participant devices.
 * ✅ **Multimedia Capture:** Camera + gallery photo picker, compressed via `ImageCompressor` (max 1280px, JPEG 80%, EXIF rotation fix) before upload to Firebase Storage.
 * ✅ **Giphy SDK Core:** In-app GIF selection via `GiphyDialogFragment`. Giphy CDN URL stored directly as `contentUrl` — no Firebase Storage upload needed. Animated GIF rendering via Coil with `ImageDecoderDecoder` / `GifDecoder`.
-* **Points Progression Graph Screen:** Dedicated screen accessible via the `Graph` TopAppBar text button. Displays a line chart (Vico Charts) tracking each participant's score over time throughout the event. *(deferred)*
+* ✅ **Points Progression Graph Screen:** Dedicated screen accessible via the `Graph` TopAppBar text button. Displays a Vico Charts line chart tracking each participant's cumulative score over time (one line per participant, colour-coded). Standings list below the chart sorted by total score.
 * ✅ **Peer-Driven Scoring System:**
     * **Event Log Feed:** Points are accumulated exclusively when a user publishes a timeline note (Text, Photo, or GIF) and explicitly targets/nominates another participant (self-targeting is locked).
     * **Tier Selection:** Before posting, the author picks a tier that defines the weight of the nomination. The label and point value are always shown together. Four tiers available: **Fact** (+1), **Hot Take** (+2), **Witnessed** (+5), **Lore** (+10). Tier labels are subject to change and the system may expand in future iterations.
