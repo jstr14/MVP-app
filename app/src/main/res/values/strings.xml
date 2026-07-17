@@ -86,6 +86,9 @@
     <string name="live_feed_compose_nominate">Who are you nominating?</string>
     <string name="live_feed_compose_placeholder">Write something…</string>
     <string name="live_feed_compose_post_btn">Post</string>
+    <string name="live_feed_compose_camera_btn">Camera</string>
+    <string name="live_feed_compose_gallery_btn">Gallery</string>
+    <string name="live_feed_compose_remove_photo_accessibility">Remove photo</string>
     <plurals name="live_feed_tier_points">
         <item quantity="one">+%d pt</item>
         <item quantity="other">+%d pts</item>

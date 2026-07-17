@@ -10,6 +10,7 @@ data class LiveFeedUiState(
     val currentUserId: String = "",
     val isAdmin: Boolean = false,
     val isPosting: Boolean = false,
+    val postSuccess: Boolean = false,
     val isLoading: Boolean = true,
     val error: String? = null
 )

@@ -1,5 +1,6 @@
 package com.hectordev.mvp.ui.features.feed
 
+import android.net.Uri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -76,21 +77,23 @@ class LiveFeedViewModel @Inject constructor(
         }
     }
 
-    fun postNote(tier: TimelineTier, targetUserId: String, text: String) {
+    fun postNote(tier: TimelineTier, targetUserId: String, text: String, imageUri: Uri? = null) {
         viewModelScope.launch {
             _uiState.update { it.copy(isPosting = true) }
             try {
+                val contentUrl = imageUri?.let { eventsRepository.uploadNotePhoto(eventId, it) }
                 val note = TimelineNote(
                     authorId = currentUserId,
                     targetUserId = targetUserId,
-                    type = NoteType.TEXT,
-                    textContent = text.trim(),
+                    type = if (contentUrl != null) NoteType.PHOTO else NoteType.TEXT,
+                    textContent = text.trim().ifBlank { null },
+                    contentUrl = contentUrl,
                     tier = tier,
                     pointsAwarded = tier.points,
                     timestamp = System.currentTimeMillis()
                 )
                 eventsRepository.postNote(eventId, note)
-                _uiState.update { it.copy(isPosting = false) }
+                _uiState.update { it.copy(isPosting = false, postSuccess = true) }
             } catch (e: Exception) {
                 _uiState.update { it.copy(isPosting = false, error = e.localizedMessage) }
             }
@@ -105,6 +108,10 @@ class LiveFeedViewModel @Inject constructor(
                 _uiState.update { it.copy(error = e.localizedMessage) }
             }
         }
+    }
+
+    fun clearPostSuccess() {
+        _uiState.update { it.copy(postSuccess = false) }
     }
 
     fun clearError() {

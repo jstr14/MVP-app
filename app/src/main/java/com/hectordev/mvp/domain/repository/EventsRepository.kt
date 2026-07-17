@@ -1,5 +1,6 @@
 package com.hectordev.mvp.domain.repository
 
+import android.net.Uri
 import com.hectordev.mvp.domain.Event
 import com.hectordev.mvp.domain.EventStatus
 import com.hectordev.mvp.domain.Prediction
@@ -29,4 +30,5 @@ interface EventsRepository {
     fun observeTimeline(eventId: String): Flow<List<TimelineNote>>
     suspend fun postNote(eventId: String, note: TimelineNote): String
     suspend fun deleteNote(eventId: String, noteId: String)
+    suspend fun uploadNotePhoto(eventId: String, imageUri: Uri): String
 }

@@ -1,8 +1,11 @@
 package com.hectordev.mvp.data.repository
 
+import android.net.Uri
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
+import com.hectordev.mvp.data.util.ImageCompressor
 import com.google.firebase.firestore.Query
+import com.google.firebase.storage.FirebaseStorage
 import com.hectordev.mvp.data.mapper.toDomain
 import com.hectordev.mvp.data.mapper.toDto
 import com.hectordev.mvp.data.model.EventDto
@@ -20,7 +23,9 @@ import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
 class EventsRepositoryDefault @Inject constructor(
-    private val firestore: FirebaseFirestore
+    private val firestore: FirebaseFirestore,
+    private val storage: FirebaseStorage,
+    private val imageCompressor: ImageCompressor
 ) : EventsRepository {
 
     private val eventsCollection = firestore.collection("events")
@@ -181,6 +186,12 @@ class EventsRepositoryDefault @Inject constructor(
 
     override suspend fun deleteNote(eventId: String, noteId: String) {
         eventsCollection.document(eventId).collection("points_log").document(noteId).delete().await()
+    }
+
+    override suspend fun uploadNotePhoto(eventId: String, imageUri: Uri): String {
+        val ref = storage.reference.child("events/$eventId/notes/${System.currentTimeMillis()}.jpg")
+        ref.putBytes(imageCompressor.compress(imageUri)).await()
+        return ref.downloadUrl.await().toString()
     }
 
     override fun observePendingInvitations(userId: String): Flow<List<Event>> = callbackFlow {
