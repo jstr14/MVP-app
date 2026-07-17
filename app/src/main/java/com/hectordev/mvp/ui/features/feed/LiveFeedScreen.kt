@@ -14,6 +14,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -48,6 +50,7 @@ fun LiveFeedScreen(
     onBack: () -> Unit,
     onGoToGraph: () -> Unit,
     onGoToDetails: () -> Unit,
+    onGoToGala: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: LiveFeedViewModel = hiltViewModel()
 ) {
@@ -57,6 +60,9 @@ fun LiveFeedScreen(
         onBack = onBack,
         onGoToGraph = onGoToGraph,
         onGoToDetails = onGoToDetails,
+        onGoToGala = onGoToGala,
+        onEndEvent = viewModel::endEvent,
+        onClearNavigateToGala = viewModel::clearNavigateToGala,
         onPostNote = { tier, targetId, text, uri, gifUrl -> viewModel.postNote(tier, targetId, text, uri, gifUrl) },
         onPostSuccessConsumed = viewModel::clearPostSuccess,
         onDeleteNote = viewModel::deleteNote,
@@ -73,6 +79,9 @@ internal fun LiveFeedContent(
     onBack: () -> Unit,
     onGoToGraph: () -> Unit,
     onGoToDetails: () -> Unit,
+    onGoToGala: () -> Unit,
+    onEndEvent: () -> Unit,
+    onClearNavigateToGala: () -> Unit,
     onPostNote: (TimelineTier, String, String, Uri?, String?) -> Unit,
     onPostSuccessConsumed: () -> Unit,
     onDeleteNote: (TimelineNote) -> Unit,
@@ -83,6 +92,14 @@ internal fun LiveFeedContent(
     val snackbarHostState = remember { SnackbarHostState() }
     val listState = rememberLazyListState()
     var showComposeSheet by remember { mutableStateOf(false) }
+    var showEndEventConfirmation by remember { mutableStateOf(false) }
+
+    LaunchedEffect(uiState.navigateToGala) {
+        if (uiState.navigateToGala) {
+            onGoToGala()
+            onClearNavigateToGala()
+        }
+    }
 
     LaunchedEffect(uiState.postSuccess) {
         if (uiState.postSuccess) listState.animateScrollToItem(0)
@@ -93,6 +110,24 @@ internal fun LiveFeedContent(
             snackbarHostState.showSnackbar(it)
             onErrorShown()
         }
+    }
+
+    if (showEndEventConfirmation) {
+        AlertDialog(
+            onDismissRequest = { showEndEventConfirmation = false },
+            title = { Text(stringResource(R.string.live_feed_end_event_confirm_title)) },
+            text = { Text(stringResource(R.string.live_feed_end_event_confirm_message)) },
+            confirmButton = {
+                Button(onClick = { onEndEvent(); showEndEventConfirmation = false }) {
+                    Text(stringResource(R.string.live_feed_end_event_confirm_btn))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showEndEventConfirmation = false }) {
+                    Text(stringResource(R.string.home_cancel))
+                }
+            }
+        )
     }
 
     if (showComposeSheet) {
@@ -124,6 +159,14 @@ internal fun LiveFeedContent(
                     }
                 },
                 actions = {
+                    if (uiState.isAdmin) {
+                        TextButton(onClick = { showEndEventConfirmation = true }) {
+                            Text(
+                                text = stringResource(R.string.live_feed_end_event_btn),
+                                color = MaterialTheme.colorScheme.error
+                            )
+                        }
+                    }
                     IconButton(onClick = onGoToDetails) {
                         Icon(Icons.Default.Info, contentDescription = stringResource(R.string.live_feed_event_details_accessibility))
                     }

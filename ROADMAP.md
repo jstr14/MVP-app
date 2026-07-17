@@ -93,12 +93,28 @@ Each card displays:
     * **Note Card Display:** Each published note shows its tier label and point value so all participants can see the weight assigned.
     * **Social Interactions:** Other players can react with emojis on notes to build engagement, but reactions do not award additional points.
     * **Note Deletion:** Admin can delete any note; the note's own author can also delete their own notes. Deletion subtracts the tier's assigned points from the targeted user's score in real time.
-* **Emergency Vote / Basic Services ("Cláusula Hospitalaria / Policía"):** *(deferred)*
-    * **Instant Crowd-Panic:** Any user can trigger this override via the `⚡` TopAppBar icon, targeting one participant (not themselves).
-    * **Democratic Cross-App Pop-up:** Fires a blocking overlay to all connected devices. Users must choose to Accept or Decline.
-    * **Timeout:** If the vote is not resolved (accepted or declined by all participants) within **3 minutes**, the request is automatically discarded and no points are awarded.
-    * **Instant Match Point Victory:** If the absolute majority votes "Accept" before the timeout, the voting freezes, the event hits emergency shutdown, and the targeted user gets a massive point payload (`+1000.0 pts`) to win the preliminary board instantly.
-    * **One-Shot Rule:** If the majority votes "Decline" or the request times out, the user who triggered it permanently loses the ability to fire the Emergency Clause again for the remainder of this event.
+* **Emergency Vote / Basic Services ("Cláusula Hospitalaria / Policía"):** *(deferred — implement after Sprint 4 event-end flow is complete)*
+
+    **Trigger flow:**
+    * Any participant can tap the `⚡` TopAppBar icon in `LiveFeedScreen` to initiate the Emergency Clause. The button is disabled if the user has already spent their one-shot or if an emergency is already active.
+    * Tapping `⚡` opens a target selection bottom sheet (all participants except self). Selecting a target shows a confirmation dialog warning that this is a one-time action.
+    * On confirm, a new document is created in `/events/{eventId}/emergency_requests/{requestId}` with `status = PENDING`, `expiresAt = now + 3 minutes`, and `votesAccept = [triggeredById]` (triggerer's vote is automatically cast as Accept).
+    * The event document is updated with `activeEmergencyId = requestId`.
+
+    **Blocking overlay (shown on all devices when `activeEmergencyId` is set):**
+    * Full-screen non-dismissible overlay that appears on top of the feed for all participants.
+    * All participants must vote — the overlay cannot be closed until the vote is resolved or times out.
+    * **Triggerer view:** shows who they nominated, live vote counts (✓ Accept / ✗ Decline / ⏳ Pending), countdown timer, and a "Waiting for the group to vote…" message. No vote buttons — their vote was auto-cast.
+    * **All other participants' view:** shows who triggered it and who the target is, live vote counts, countdown timer, and Accept / Decline buttons. Buttons are disabled after voting.
+    * **Phone button:** A prominent phone icon in the overlay opens the system dialer pre-filled with `112` (universal European emergency number) via `Intent(ACTION_DIAL, Uri.parse("tel:112"))`. This provides a real safety affordance in line with the "Cláusula Hospitalaria / Policía" name — no auto-call, just opens the dialer.
+
+    **Resolution:**
+    * **APPROVED_SHUTDOWN:** If `votesAccept.size` reaches an absolute majority of all participants before the timeout, the event follows the same end-of-event flow as a normal admin close (see Sprint 4). The target participant is set as the winner (`mvpId = targetUserId`) and the event transitions to the post-event screens. The +1000pts payload is recorded as a special entry in `points_log`.
+    * **REJECTED:** If all non-triggerer participants have voted and Accept did not reach majority, status → `REJECTED`. The event continues. The triggerer's UID is added to `usedEmergencyClause[]` on the event document.
+    * **TIMED_OUT:** If `expiresAt` passes with no majority reached, status → `TIMED_OUT`. The event continues. The triggerer's UID is added to `usedEmergencyClause[]`.
+    * In all cases, `activeEmergencyId` is cleared on the event document after resolution.
+
+    **One-Shot Rule:** Once a user's emergency attempt ends in REJECTED or TIMED_OUT, the `⚡` button is permanently disabled for them for the remainder of this event (enforced via `usedEmergencyClause[]` on the event document).
 
 ### 🔴 Sprint 4: The Final Awards Gala & Certification Engine
 * **Closing the Live Event (Admin):** An admin-only "End Event" button in the `LiveFeedScreen` TopAppBar (with a confirmation dialog) transitions the event from `ON_GOING` to `VOTING_PHASE`. All participants' Firestore listeners detect the status change in real time and auto-navigate to the Voting/Gala screen.

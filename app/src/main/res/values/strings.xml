@@ -74,6 +74,7 @@
     <string name="event_details_prediction_mvp_pick">MVP: %s</string>
     <string name="event_details_prediction_triple_pick">Triple: %s</string>
     <string name="event_details_prediction_success">Prediction saved successfully!</string>
+    <string name="event_details_live_feed_btn">Live Feed</string>
 
     <!-- Live Feed Feature Strings -->
     <string name="live_feed_graph_btn">Graph</string>
@@ -91,11 +92,18 @@
     <string name="live_feed_compose_remove_photo_accessibility">Remove photo</string>
     <string name="live_feed_compose_gif_btn">GIF</string>
     <string name="live_feed_add_reaction_accessibility">Add reaction</string>
+    <string name="live_feed_end_event_btn">End Event</string>
+    <string name="live_feed_end_event_confirm_title">End the event?</string>
+    <string name="live_feed_end_event_confirm_message">This will close the live feed and move to the final vote. This cannot be undone.</string>
+    <string name="live_feed_end_event_confirm_btn">End Event</string>
     <plurals name="live_feed_tier_points">
         <item quantity="one">+%d pt</item>
         <item quantity="other">+%d pts</item>
     </plurals>
-    <string name="event_details_live_feed_btn">Live Feed</string>
+
+    <!-- Gala Feature Strings -->
+    <string name="gala_title">Final Gala</string>
+    <string name="gala_coming_soon">Gala coming soon…</string>
 
     <!-- Score Graph Feature Strings -->
     <string name="score_graph_title">Score Graph</string>
