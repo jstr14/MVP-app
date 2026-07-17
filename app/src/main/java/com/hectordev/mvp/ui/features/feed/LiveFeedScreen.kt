@@ -60,6 +60,7 @@ fun LiveFeedScreen(
         onPostNote = { tier, targetId, text, uri, gifUrl -> viewModel.postNote(tier, targetId, text, uri, gifUrl) },
         onPostSuccessConsumed = viewModel::clearPostSuccess,
         onDeleteNote = viewModel::deleteNote,
+        onToggleReaction = viewModel::toggleReaction,
         onErrorShown = viewModel::clearError,
         modifier = modifier
     )
@@ -75,6 +76,7 @@ internal fun LiveFeedContent(
     onPostNote: (TimelineTier, String, String, Uri?, String?) -> Unit,
     onPostSuccessConsumed: () -> Unit,
     onDeleteNote: (TimelineNote) -> Unit,
+    onToggleReaction: (TimelineNote, String) -> Unit,
     onErrorShown: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -175,7 +177,8 @@ internal fun LiveFeedContent(
                     participants = uiState.participants,
                     isAdmin = uiState.isAdmin,
                     currentUserId = uiState.currentUserId,
-                    onDelete = { onDeleteNote(note) }
+                    onDelete = { onDeleteNote(note) },
+                    onToggleReaction = { emoji -> onToggleReaction(note, emoji) }
                 )
             }
         }

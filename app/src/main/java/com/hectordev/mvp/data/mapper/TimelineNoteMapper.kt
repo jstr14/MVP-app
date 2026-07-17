@@ -15,7 +15,8 @@ fun TimelineNoteDto.toDomain(): TimelineNote {
         contentUrl = contentUrl,
         tier = TimelineTier.entries.find { it.label == tierLabel } ?: TimelineTier.FACT,
         pointsAwarded = pointsAwarded,
-        timestamp = timestamp
+        timestamp = timestamp,
+        reactions = reactions
     )
 }
 
@@ -29,6 +30,7 @@ fun TimelineNote.toDto(): TimelineNoteDto {
         contentUrl = contentUrl,
         tierLabel = tier.label,
         pointsAwarded = tier.points,
-        timestamp = timestamp
+        timestamp = timestamp,
+        reactions = reactions
     )
 }

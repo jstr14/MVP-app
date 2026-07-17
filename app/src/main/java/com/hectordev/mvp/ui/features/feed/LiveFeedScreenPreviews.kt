@@ -28,25 +28,29 @@ internal val previewNotes = listOf(
         id = "1", authorId = "1", targetUserId = "2",
         type = NoteType.TEXT, tier = TimelineTier.HOT_TAKE, pointsAwarded = 2,
         textContent = "She absolutely carried the whole dinner.",
-        timestamp = 1_750_000_000_000L
+        timestamp = 1_750_000_000_000L,
+        reactions = mapOf("😂" to listOf("2", "3"), "🔥" to listOf("3"))
     ),
     TimelineNote(
         id = "2", authorId = "3", targetUserId = "1",
         type = NoteType.TEXT, tier = TimelineTier.LORE, pointsAwarded = 10,
         textContent = "This man ordered dessert before anyone finished their starter.",
-        timestamp = 1_750_001_000_000L
+        timestamp = 1_750_001_000_000L,
+        reactions = mapOf("😭" to listOf("1", "2", "3"), "🚨" to listOf("2"), "🤮" to listOf("1"))
     ),
     TimelineNote(
         id = "3", authorId = "2", targetUserId = "3",
         type = NoteType.TEXT, tier = TimelineTier.FACT, pointsAwarded = 1,
         textContent = "Lost at every single card game.",
-        timestamp = 1_750_002_000_000L
+        timestamp = 1_750_002_000_000L,
+        reactions = mapOf("🤡" to listOf("1", "3"))
     ),
     TimelineNote(
         id = "4", authorId = "1", targetUserId = "3",
         type = NoteType.TEXT, tier = TimelineTier.WITNESSED, pointsAwarded = 5,
         textContent = "Broke the vibe machine at the hotel bar. We all saw it.",
-        timestamp = 1_750_003_000_000L
+        timestamp = 1_750_003_000_000L,
+        reactions = mapOf("👀" to listOf("2", "3"), "🤮" to listOf("1"), "🫡" to listOf("2"))
     )
 )
 
@@ -72,6 +76,7 @@ private fun LiveFeedWithNotesAdminPreview() {
                 onPostNote = { _, _, _, _, _ -> },
                 onPostSuccessConsumed = {},
                 onDeleteNote = {},
+                onToggleReaction = { _, _ -> },
                 onErrorShown = {}
             )
         }
@@ -98,6 +103,7 @@ private fun LiveFeedWithNotesParticipantPreview() {
                 onPostNote = { _, _, _, _, _ -> },
                 onPostSuccessConsumed = {},
                 onDeleteNote = {},
+                onToggleReaction = { _, _ -> },
                 onErrorShown = {}
             )
         }
@@ -124,6 +130,7 @@ private fun LiveFeedEmptyPreview() {
                 onPostNote = { _, _, _, _, _ -> },
                 onPostSuccessConsumed = {},
                 onDeleteNote = {},
+                onToggleReaction = { _, _ -> },
                 onErrorShown = {}
             )
         }
@@ -140,7 +147,8 @@ private fun NoteCardLorePreview() {
                 participants = previewUsers,
                 isAdmin = true,
                 currentUserId = "1",
-                onDelete = {}
+                onDelete = {},
+                onToggleReaction = {}
             )
         }
     }
@@ -156,7 +164,8 @@ private fun NoteCardFactPreview() {
                 participants = previewUsers,
                 isAdmin = false,
                 currentUserId = "2",
-                onDelete = {}
+                onDelete = {},
+                onToggleReaction = {}
             )
         }
     }

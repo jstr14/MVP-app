@@ -114,6 +114,21 @@ class LiveFeedViewModel @Inject constructor(
         }
     }
 
+    fun toggleReaction(note: TimelineNote, emoji: String) {
+        viewModelScope.launch {
+            try {
+                val alreadyReacted = note.reactions[emoji]?.contains(currentUserId) == true
+                if (alreadyReacted) {
+                    eventsRepository.removeReaction(eventId, note.id, emoji, currentUserId)
+                } else {
+                    eventsRepository.addReaction(eventId, note.id, emoji, currentUserId)
+                }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(error = e.localizedMessage) }
+            }
+        }
+    }
+
     fun deleteNote(note: TimelineNote) {
         viewModelScope.launch {
             try {

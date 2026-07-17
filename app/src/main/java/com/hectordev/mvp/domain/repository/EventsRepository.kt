@@ -31,4 +31,6 @@ interface EventsRepository {
     suspend fun postNote(eventId: String, note: TimelineNote): String
     suspend fun deleteNote(eventId: String, noteId: String)
     suspend fun uploadNotePhoto(eventId: String, imageUri: Uri): String
+    suspend fun addReaction(eventId: String, noteId: String, emoji: String, userId: String)
+    suspend fun removeReaction(eventId: String, noteId: String, emoji: String, userId: String)
 }

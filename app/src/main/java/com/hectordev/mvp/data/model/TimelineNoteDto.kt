@@ -9,5 +9,6 @@ data class TimelineNoteDto(
     val contentUrl: String? = null,
     val tierLabel: String = "Fact",
     val pointsAwarded: Int = 1,
-    val timestamp: Long = 0L
+    val timestamp: Long = 0L,
+    val reactions: Map<String, List<String>> = emptyMap()
 )

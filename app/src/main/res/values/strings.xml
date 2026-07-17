@@ -90,6 +90,7 @@
     <string name="live_feed_compose_gallery_btn">Gallery</string>
     <string name="live_feed_compose_remove_photo_accessibility">Remove photo</string>
     <string name="live_feed_compose_gif_btn">GIF</string>
+    <string name="live_feed_add_reaction_accessibility">Add reaction</string>
     <plurals name="live_feed_tier_points">
         <item quantity="one">+%d pt</item>
         <item quantity="other">+%d pts</item>

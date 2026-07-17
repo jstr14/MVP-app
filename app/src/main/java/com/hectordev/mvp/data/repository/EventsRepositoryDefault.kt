@@ -188,6 +188,22 @@ class EventsRepositoryDefault @Inject constructor(
         eventsCollection.document(eventId).collection("points_log").document(noteId).delete().await()
     }
 
+    override suspend fun addReaction(eventId: String, noteId: String, emoji: String, userId: String) {
+        eventsCollection.document(eventId)
+            .collection("points_log")
+            .document(noteId)
+            .update("reactions.$emoji", FieldValue.arrayUnion(userId))
+            .await()
+    }
+
+    override suspend fun removeReaction(eventId: String, noteId: String, emoji: String, userId: String) {
+        eventsCollection.document(eventId)
+            .collection("points_log")
+            .document(noteId)
+            .update("reactions.$emoji", FieldValue.arrayRemove(userId))
+            .await()
+    }
+
     override suspend fun uploadNotePhoto(eventId: String, imageUri: Uri): String {
         val ref = storage.reference.child("events/$eventId/notes/${System.currentTimeMillis()}.jpg")
         ref.putBytes(imageCompressor.compress(imageUri)).await()
