@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
@@ -56,7 +57,7 @@ fun LiveFeedScreen(
         onBack = onBack,
         onGoToGraph = onGoToGraph,
         onGoToDetails = onGoToDetails,
-        onPostNote = { tier, targetId, text, uri -> viewModel.postNote(tier, targetId, text, uri) },
+        onPostNote = { tier, targetId, text, uri, gifUrl -> viewModel.postNote(tier, targetId, text, uri, gifUrl) },
         onPostSuccessConsumed = viewModel::clearPostSuccess,
         onDeleteNote = viewModel::deleteNote,
         onErrorShown = viewModel::clearError,
@@ -71,14 +72,19 @@ internal fun LiveFeedContent(
     onBack: () -> Unit,
     onGoToGraph: () -> Unit,
     onGoToDetails: () -> Unit,
-    onPostNote: (TimelineTier, String, String, Uri?) -> Unit,
+    onPostNote: (TimelineTier, String, String, Uri?, String?) -> Unit,
     onPostSuccessConsumed: () -> Unit,
     onDeleteNote: (TimelineNote) -> Unit,
     onErrorShown: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
+    val listState = rememberLazyListState()
     var showComposeSheet by remember { mutableStateOf(false) }
+
+    LaunchedEffect(uiState.postSuccess) {
+        if (uiState.postSuccess) listState.animateScrollToItem(0)
+    }
 
     LaunchedEffect(uiState.error) {
         uiState.error?.let {
@@ -92,7 +98,7 @@ internal fun LiveFeedContent(
             participants = uiState.participants.filter { it.id != uiState.currentUserId },
             isPosting = uiState.isPosting,
             postSuccess = uiState.postSuccess,
-            onPost = { tier, targetId, text, uri -> onPostNote(tier, targetId, text, uri) },
+            onPost = { tier, targetId, text, uri, gifUrl -> onPostNote(tier, targetId, text, uri, gifUrl) },
             onDismiss = { showComposeSheet = false },
             onPostSuccessConsumed = onPostSuccessConsumed
         )
@@ -155,6 +161,7 @@ internal fun LiveFeedContent(
         }
 
         LazyColumn(
+            state = listState,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)

@@ -96,6 +96,16 @@ internal fun NoteCard(
                         .heightIn(max = 250.dp)
                         .clip(RoundedCornerShape(8.dp))
                 )
+            } else if (note.type == NoteType.GIF && note.contentUrl != null) {
+                AsyncImage(
+                    model = note.contentUrl,
+                    contentDescription = null,
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(max = 300.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                )
             }
 
             note.textContent?.let {

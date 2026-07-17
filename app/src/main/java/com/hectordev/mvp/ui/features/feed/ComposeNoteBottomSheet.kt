@@ -7,6 +7,11 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.fragment.app.FragmentActivity
+import com.giphy.sdk.core.models.Media
+import com.giphy.sdk.ui.GPHContentType
+import com.giphy.sdk.ui.GPHSettings
+import com.giphy.sdk.ui.views.GiphyDialogFragment
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -14,9 +19,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -72,7 +80,7 @@ internal fun ComposeNoteBottomSheet(
     participants: List<User>,
     isPosting: Boolean,
     postSuccess: Boolean,
-    onPost: (TimelineTier, String, String, Uri?) -> Unit,
+    onPost: (TimelineTier, String, String, Uri?, String?) -> Unit,
     onDismiss: () -> Unit,
     onPostSuccessConsumed: () -> Unit
 ) {
@@ -82,6 +90,7 @@ internal fun ComposeNoteBottomSheet(
     var selectedTargetId by remember { mutableStateOf("") }
     var textInput by remember { mutableStateOf("") }
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
+    var selectedGifUrl by remember { mutableStateOf<String?>(null) }
     var cameraUri by remember { mutableStateOf<Uri?>(null) }
 
     LaunchedEffect(postSuccess) {
@@ -112,7 +121,7 @@ internal fun ComposeNoteBottomSheet(
 
     val canPost = selectedTier != null &&
             selectedTargetId.isNotEmpty() &&
-            (textInput.isNotBlank() || selectedImageUri != null) &&
+            (textInput.isNotBlank() || selectedImageUri != null || selectedGifUrl != null) &&
             !isPosting
 
     ModalBottomSheet(
@@ -122,6 +131,7 @@ internal fun ComposeNoteBottomSheet(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
                 .padding(horizontal = 24.dp)
                 .padding(bottom = 24.dp)
                 .navigationBarsPadding(),
@@ -203,6 +213,7 @@ internal fun ComposeNoteBottomSheet(
                         } else {
                             cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
                         }
+                        selectedGifUrl = null
                     },
                     modifier = Modifier.weight(1f)
                 ) {
@@ -215,6 +226,7 @@ internal fun ComposeNoteBottomSheet(
                         galleryLauncher.launch(
                             PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
                         )
+                        selectedGifUrl = null
                     },
                     modifier = Modifier.weight(1f)
                 ) {
@@ -222,22 +234,64 @@ internal fun ComposeNoteBottomSheet(
                     Spacer(Modifier.width(4.dp))
                     Text(stringResource(R.string.live_feed_compose_gallery_btn))
                 }
+                OutlinedButton(
+                    onClick = {
+                        val activity = context as FragmentActivity
+                        val settings = GPHSettings().apply {
+                            mediaTypeConfig = arrayOf(GPHContentType.gif)
+                        }
+                        val dialog = GiphyDialogFragment.newInstance(settings)
+                        dialog.gifSelectionListener = object : GiphyDialogFragment.GifSelectionListener {
+                            override fun onGifSelected(
+                                media: Media,
+                                searchTerm: String?,
+                                selectedContentType: GPHContentType
+                            ) {
+                                selectedGifUrl = media.images.fixedWidth?.gifUrl
+                                    ?: media.images.original?.gifUrl
+                                selectedImageUri = null
+                            }
+                            override fun onDismissed(selectedContentType: GPHContentType) {}
+                            override fun didSearchTerm(term: String) {}
+                        }
+                        dialog.show(activity.supportFragmentManager, "giphy_dialog")
+                    },
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text(stringResource(R.string.live_feed_compose_gif_btn))
+                }
             }
 
-            // Photo preview
-            selectedImageUri?.let { uri ->
+            // Media preview (photo or GIF)
+            val hasMedia = selectedImageUri != null || selectedGifUrl != null
+            if (hasMedia) {
                 Box {
-                    AsyncImage(
-                        model = uri,
-                        contentDescription = null,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(160.dp)
-                            .clip(RoundedCornerShape(8.dp))
-                    )
+                    if (selectedImageUri != null) {
+                        AsyncImage(
+                            model = selectedImageUri,
+                            contentDescription = null,
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(160.dp)
+                                .clip(RoundedCornerShape(8.dp))
+                        )
+                    } else if (selectedGifUrl != null) {
+                        AsyncImage(
+                            model = selectedGifUrl,
+                            contentDescription = null,
+                            contentScale = ContentScale.Fit,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .heightIn(max = 200.dp)
+                                .clip(RoundedCornerShape(8.dp))
+                        )
+                    }
                     IconButton(
-                        onClick = { selectedImageUri = null },
+                        onClick = {
+                            selectedImageUri = null
+                            selectedGifUrl = null
+                        },
                         modifier = Modifier
                             .align(Alignment.TopEnd)
                             .padding(4.dp)
@@ -257,7 +311,7 @@ internal fun ComposeNoteBottomSheet(
             Button(
                 onClick = {
                     val tier = selectedTier ?: return@Button
-                    onPost(tier, selectedTargetId, textInput, selectedImageUri)
+                    onPost(tier, selectedTargetId, textInput, selectedImageUri, selectedGifUrl)
                 },
                 enabled = canPost,
                 modifier = Modifier.fillMaxWidth()

@@ -69,7 +69,7 @@ private fun LiveFeedWithNotesAdminPreview() {
                 onBack = {},
                 onGoToGraph = {},
                 onGoToDetails = {},
-                onPostNote = { _, _, _, _ -> },
+                onPostNote = { _, _, _, _, _ -> },
                 onPostSuccessConsumed = {},
                 onDeleteNote = {},
                 onErrorShown = {}
@@ -95,7 +95,7 @@ private fun LiveFeedWithNotesParticipantPreview() {
                 onBack = {},
                 onGoToGraph = {},
                 onGoToDetails = {},
-                onPostNote = { _, _, _, _ -> },
+                onPostNote = { _, _, _, _, _ -> },
                 onPostSuccessConsumed = {},
                 onDeleteNote = {},
                 onErrorShown = {}
@@ -121,7 +121,7 @@ private fun LiveFeedEmptyPreview() {
                 onBack = {},
                 onGoToGraph = {},
                 onGoToDetails = {},
-                onPostNote = { _, _, _, _ -> },
+                onPostNote = { _, _, _, _, _ -> },
                 onPostSuccessConsumed = {},
                 onDeleteNote = {},
                 onErrorShown = {}

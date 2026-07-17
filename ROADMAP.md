@@ -84,8 +84,8 @@ Each card displays:
 
 #### Feature implementations
 * ✅ **Chronological Multimedia Wall:** Live Firestore snapshots (`addSnapshotListener`) feeding a real-time, highly synchronized chronological timeline across all participant devices.
-* **Multimedia Capture:** Direct Firebase Storage integration for quick-snapping photos embedded within live notes. *(deferred)*
-* **Giphy SDK Core:** In-app GIF selection interface allowing users to react visually to real-time group highlights. *(deferred)*
+* ✅ **Multimedia Capture:** Camera + gallery photo picker, compressed via `ImageCompressor` (max 1280px, JPEG 80%, EXIF rotation fix) before upload to Firebase Storage.
+* ✅ **Giphy SDK Core:** In-app GIF selection via `GiphyDialogFragment`. Giphy CDN URL stored directly as `contentUrl` — no Firebase Storage upload needed. Animated GIF rendering via Coil with `ImageDecoderDecoder` / `GifDecoder`.
 * **Points Progression Graph Screen:** Dedicated screen accessible via the `Graph` TopAppBar text button. Displays a line chart (Vico Charts) tracking each participant's score over time throughout the event. *(deferred)*
 * ✅ **Peer-Driven Scoring System:**
     * **Event Log Feed:** Points are accumulated exclusively when a user publishes a timeline note (Text, Photo, or GIF) and explicitly targets/nominates another participant (self-targeting is locked).

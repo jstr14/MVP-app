@@ -77,15 +77,29 @@ class LiveFeedViewModel @Inject constructor(
         }
     }
 
-    fun postNote(tier: TimelineTier, targetUserId: String, text: String, imageUri: Uri? = null) {
+    fun postNote(
+        tier: TimelineTier,
+        targetUserId: String,
+        text: String,
+        imageUri: Uri? = null,
+        gifUrl: String? = null
+    ) {
         viewModelScope.launch {
             _uiState.update { it.copy(isPosting = true) }
             try {
-                val contentUrl = imageUri?.let { eventsRepository.uploadNotePhoto(eventId, it) }
+                val contentUrl = when {
+                    imageUri != null -> eventsRepository.uploadNotePhoto(eventId, imageUri)
+                    else -> gifUrl
+                }
+                val type = when {
+                    gifUrl != null -> NoteType.GIF
+                    contentUrl != null -> NoteType.PHOTO
+                    else -> NoteType.TEXT
+                }
                 val note = TimelineNote(
                     authorId = currentUserId,
                     targetUserId = targetUserId,
-                    type = if (contentUrl != null) NoteType.PHOTO else NoteType.TEXT,
+                    type = type,
                     textContent = text.trim().ifBlank { null },
                     contentUrl = contentUrl,
                     tier = tier,
