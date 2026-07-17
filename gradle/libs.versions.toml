@@ -16,7 +16,10 @@ hilt = "2.59.2"
 hiltNavigationCompose = "1.2.0"
 androidxNavigation = "2.8.8" # Latest stable version for type-safe nav
 kotlinxSerialization = "1.8.0"
+appcompat = "1.7.0"
 coil = "2.7.0"
+giphy = "2.3.8"
+vico = "2.0.0-alpha.28"
 playServicesLocation = "21.3.0"
 
 [libraries]
@@ -35,6 +38,7 @@ androidx-compose-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-
 androidx-compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3" }
 androidx-compose-material-icons-core = { group = "androidx.compose.material", name = "material-icons-core" }
+androidx-compose-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended" }
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "androidxNavigation" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerialization" }
 # Firebase
@@ -46,7 +50,11 @@ firebase-storage = { group = "com.google.firebase", name = "firebase-storage-ktx
 google-id = { group = "com.google.android.libraries.identity.googleid", name = "googleid", version.ref = "googleId" }
 credentials = { group = "androidx.credentials", name = "credentials", version = "1.2.2" }
 credentials-play-services-auth = { group = "androidx.credentials", name = "credentials-play-services-auth", version = "1.2.2" }
+androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
+vico-compose-m3 = { group = "com.patrykandpatrick.vico", name = "compose-m3", version.ref = "vico" }
+coil-gif = { group = "io.coil-kt", name = "coil-gif", version.ref = "coil" }
+giphy = { group = "com.giphy.sdk", name = "ui", version.ref = "giphy" }
 play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
 # Hilt
 hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }

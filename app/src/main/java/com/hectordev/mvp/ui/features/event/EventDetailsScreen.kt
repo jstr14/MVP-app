@@ -77,6 +77,7 @@ import com.hectordev.mvp.ui.core.theme.MVPTheme
 @Composable
 fun EventDetailsScreen(
     onBack: () -> Unit,
+    onGoToLiveFeed: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: EventDetailsViewModel = hiltViewModel()
 ) {
@@ -84,6 +85,8 @@ fun EventDetailsScreen(
     EventDetailsContent(
         uiState = uiState,
         onBack = onBack,
+        onGoToLiveFeed = onGoToLiveFeed,
+        onClearNavigateToLiveFeed = viewModel::clearNavigateToLiveFeed,
         onOpenPredictions = viewModel::openPredictions,
         onStartEvent = viewModel::startEvent,
         onSubmitPrediction = viewModel::submitPrediction,
@@ -102,6 +105,8 @@ fun EventDetailsScreen(
 private fun EventDetailsContent(
     uiState: EventDetailsUiState,
     onBack: () -> Unit,
+    onGoToLiveFeed: () -> Unit,
+    onClearNavigateToLiveFeed: () -> Unit,
     onOpenPredictions: () -> Unit,
     onStartEvent: () -> Unit,
     onSubmitPrediction: (projectedMvpId: String, tripleParticipantId: String) -> Unit,
@@ -119,6 +124,13 @@ private fun EventDetailsContent(
     var showInviteDialog by remember { mutableStateOf(false) }
     var inviteEmailInput by remember { mutableStateOf("") }
     var showPredictionSheet by remember { mutableStateOf(false) }
+
+    LaunchedEffect(uiState.navigateToLiveFeed) {
+        if (uiState.navigateToLiveFeed) {
+            onGoToLiveFeed()
+            onClearNavigateToLiveFeed()
+        }
+    }
 
     LaunchedEffect(uiState.error) {
         uiState.error?.let {
@@ -812,6 +824,8 @@ private fun EventDetailsAdminPreTripPreview() {
                     )
                 ),
                 onBack = {},
+                onGoToLiveFeed = {},
+                onClearNavigateToLiveFeed = {},
                 onOpenPredictions = {},
                 onStartEvent = {},
                 onSubmitPrediction = { _, _ -> },
@@ -847,6 +861,8 @@ private fun EventDetailsPredictionPreview() {
                     )
                 ),
                 onBack = {},
+                onGoToLiveFeed = {},
+                onClearNavigateToLiveFeed = {},
                 onOpenPredictions = {},
                 onStartEvent = {},
                 onSubmitPrediction = { _, _ -> },
@@ -884,6 +900,8 @@ private fun EventDetailsParticipantPreTripPreview() {
                     )
                 ),
                 onBack = {},
+                onGoToLiveFeed = {},
+                onClearNavigateToLiveFeed = {},
                 onOpenPredictions = {},
                 onStartEvent = {},
                 onSubmitPrediction = { _, _ -> },

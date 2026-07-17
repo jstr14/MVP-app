@@ -34,8 +34,10 @@ android {
         }
 
         val webClientId = localProperties.getProperty("FIREBASE_WEB_CLIENT_ID") ?: "\"\""
+        val giphyApiKey = localProperties.getProperty("GIPHY_API_KEY") ?: "\"\""
 
         buildConfigField("String", "FIREBASE_WEB_CLIENT_ID", webClientId)
+        buildConfigField("String", "GIPHY_API_KEY", giphyApiKey)
     }
 
     buildTypes {
@@ -62,11 +64,13 @@ dependencies {
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.material.icons.core)
+    implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.appcompat)
     testImplementation(libs.junit)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
@@ -90,6 +94,13 @@ dependencies {
 
     // Coil - async image loading
     implementation(libs.coil.compose)
+    implementation(libs.coil.gif)
+
+    // Giphy SDK
+    implementation(libs.giphy)
+
+    // Vico Charts
+    implementation(libs.vico.compose.m3)
 
     // Location
     implementation(libs.play.services.location)

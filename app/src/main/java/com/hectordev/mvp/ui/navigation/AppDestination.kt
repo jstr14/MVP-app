@@ -19,4 +19,10 @@ sealed interface AppDestination {
 
     @Serializable
     data class EventDetails(val eventId: String) : AppDestination
+
+    @Serializable
+    data class LiveFeed(val eventId: String) : AppDestination
+
+    @Serializable
+    data class ScoreGraph(val eventId: String) : AppDestination
 }

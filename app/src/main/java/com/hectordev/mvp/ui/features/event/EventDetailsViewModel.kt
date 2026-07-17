@@ -113,10 +113,15 @@ class EventDetailsViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 eventsRepository.updateStatus(eventId, EventStatus.ON_GOING)
+                _uiState.update { it.copy(navigateToLiveFeed = true) }
             } catch (e: Exception) {
                 _uiState.update { it.copy(error = e.localizedMessage) }
             }
         }
+    }
+
+    fun clearNavigateToLiveFeed() {
+        _uiState.update { it.copy(navigateToLiveFeed = false) }
     }
 
     fun inviteByEmail(email: String) {

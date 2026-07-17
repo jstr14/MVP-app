@@ -16,7 +16,8 @@ data class EventDetailsUiState(
     val inviteSuccess: Boolean = false,
     val myPrediction: Prediction? = null,
     val isSubmittingPrediction: Boolean = false,
-    val predictionSaveCount: Int = 0
+    val predictionSaveCount: Int = 0,
+    val navigateToLiveFeed: Boolean = false
 )
 
 enum class InviteError { USER_NOT_FOUND, ALREADY_MEMBER, UNKNOWN }

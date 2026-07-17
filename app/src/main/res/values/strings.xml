@@ -75,6 +75,36 @@
     <string name="event_details_prediction_triple_pick">Triple: %s</string>
     <string name="event_details_prediction_success">Prediction saved successfully!</string>
 
+    <!-- Live Feed Feature Strings -->
+    <string name="live_feed_graph_btn">Graph</string>
+    <string name="live_feed_event_details_accessibility">Event details</string>
+    <string name="live_feed_post_note_accessibility">Post note</string>
+    <string name="live_feed_empty_state">No notes yet. Be the first to post!</string>
+    <string name="live_feed_delete_note_accessibility">Delete note</string>
+    <string name="live_feed_compose_title">New note</string>
+    <string name="live_feed_compose_pick_tier">Pick a tier</string>
+    <string name="live_feed_compose_nominate">Who are you nominating?</string>
+    <string name="live_feed_compose_placeholder">Write something…</string>
+    <string name="live_feed_compose_post_btn">Post</string>
+    <string name="live_feed_compose_camera_btn">Camera</string>
+    <string name="live_feed_compose_gallery_btn">Gallery</string>
+    <string name="live_feed_compose_remove_photo_accessibility">Remove photo</string>
+    <string name="live_feed_compose_gif_btn">GIF</string>
+    <string name="live_feed_add_reaction_accessibility">Add reaction</string>
+    <plurals name="live_feed_tier_points">
+        <item quantity="one">+%d pt</item>
+        <item quantity="other">+%d pts</item>
+    </plurals>
+    <string name="event_details_live_feed_btn">Live Feed</string>
+
+    <!-- Score Graph Feature Strings -->
+    <string name="score_graph_title">Score Graph</string>
+    <string name="score_graph_empty">No notes yet. Scores will appear here.</string>
+    <string name="score_graph_standings">Standings</string>
+    <string name="score_graph_pts">%d pts</string>
+    <string name="score_graph_axis_y">Points</string>
+    <string name="score_graph_axis_x">Notes</string>
+
     <!-- Create Event Feature Strings -->
     <string name="create_event_screen_title">Create Event</string>
     <string name="create_event_name_label">Event name *</string>
