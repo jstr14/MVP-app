@@ -25,4 +25,7 @@ sealed interface AppDestination {
 
     @Serializable
     data class ScoreGraph(val eventId: String) : AppDestination
+
+    @Serializable
+    data class Gala(val eventId: String) : AppDestination
 }

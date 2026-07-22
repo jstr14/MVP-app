@@ -309,7 +309,8 @@ private fun HomeScreenContent(
                 items(uiState.pastEvents) { item ->
                     PastEventCard(
                         item = item,
-                        isWinner = item.event.mvpId == uiState.currentUserId
+                        isWinner = item.event.mvpId == uiState.currentUserId,
+                        onClick = { onEventClick(item.event.id, item.event.status) }
                     )
                 }
             }

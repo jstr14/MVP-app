@@ -33,4 +33,8 @@ interface EventsRepository {
     suspend fun uploadNotePhoto(eventId: String, imageUri: Uri): String
     suspend fun addReaction(eventId: String, noteId: String, emoji: String, userId: String)
     suspend fun removeReaction(eventId: String, noteId: String, emoji: String, userId: String)
+    suspend fun submitVote(eventId: String, voterId: String, votedForId: String)
+    fun observeVoteCount(eventId: String): Flow<Int>
+    fun observeUserVoteTarget(eventId: String, userId: String): Flow<String?>
+    suspend fun uploadGalaPhoto(eventId: String, imageUri: Uri): String
 }

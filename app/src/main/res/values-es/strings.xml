@@ -1,4 +1,6 @@
 <resources>
+    <string name="app_name">MVP</string>
+
     <!-- Auth Feature Strings -->
     <string name="login_welcome_title">¡Bienvenido a MVP!</string>
     <string name="login_welcome_subtitle">Entra de forma rápida y segura con tu cuenta de Google.</string>
@@ -15,6 +17,27 @@
     <string name="home_dashboard_placeholder">Panel de control próximamente</string>
     <string name="home_create_event_fab_accessibility">Crear nuevo evento</string>
     <string name="home_event_created_success">¡Evento creado correctamente!</string>
+    <string name="home_section_active_event">Evento activo</string>
+    <string name="home_section_past_events">Eventos pasados</string>
+    <string name="home_no_active_event">Sin evento activo. Toca + para crear uno.</string>
+    <string name="home_status_pre_trip">Planificación</string>
+    <string name="home_status_prediction">Predicciones</string>
+    <string name="home_status_on_going">En directo</string>
+    <plurals name="home_event_participants">
+        <item quantity="one">%d participante</item>
+        <item quantity="other">%d participantes</item>
+    </plurals>
+    <string name="home_delete_event">Eliminar evento</string>
+    <string name="home_delete_event_confirm_title">¿Eliminar evento?</string>
+    <string name="home_delete_event_confirm_message">Esta acción no se puede deshacer.</string>
+    <string name="home_delete_event_btn">Eliminar</string>
+    <string name="home_cancel">Cancelar</string>
+    <string name="home_section_pending_invitations">Invitaciones pendientes</string>
+    <string name="home_section_upcoming_events">Próximos eventos</string>
+    <string name="home_pending_accept">Aceptar</string>
+    <string name="home_pending_decline">Rechazar</string>
+    <string name="home_upcoming_locked_message">Disponible cuando termine tu evento actual</string>
+
     <!-- Event Details Feature Strings -->
     <string name="event_details_section_participants">Participantes</string>
     <string name="event_details_admin_badge">Admin</string>
@@ -51,27 +74,7 @@
     <string name="event_details_prediction_mvp_pick">MVP: %s</string>
     <string name="event_details_prediction_triple_pick">Triple: %s</string>
     <string name="event_details_prediction_success">¡Predicción guardada correctamente!</string>
-
-    <string name="home_section_active_event">Evento activo</string>
-    <string name="home_section_past_events">Eventos pasados</string>
-    <string name="home_no_active_event">Sin evento activo. Toca + para crear uno.</string>
-    <string name="home_status_pre_trip">Planificación</string>
-    <string name="home_status_prediction">Predicciones</string>
-    <string name="home_status_on_going">En directo</string>
-    <plurals name="home_event_participants">
-        <item quantity="one">%d participante</item>
-        <item quantity="other">%d participantes</item>
-    </plurals>
-    <string name="home_delete_event">Eliminar evento</string>
-    <string name="home_delete_event_confirm_title">¿Eliminar evento?</string>
-    <string name="home_delete_event_confirm_message">Esta acción no se puede deshacer.</string>
-    <string name="home_delete_event_btn">Eliminar</string>
-    <string name="home_cancel">Cancelar</string>
-    <string name="home_section_pending_invitations">Invitaciones pendientes</string>
-    <string name="home_section_upcoming_events">Próximos eventos</string>
-    <string name="home_pending_accept">Aceptar</string>
-    <string name="home_pending_decline">Rechazar</string>
-    <string name="home_upcoming_locked_message">Disponible cuando termine tu evento actual</string>
+    <string name="event_details_live_feed_btn">Feed en Directo</string>
 
     <!-- Live Feed Feature Strings -->
     <string name="live_feed_graph_btn">Gráfico</string>
@@ -89,11 +92,41 @@
     <string name="live_feed_compose_remove_photo_accessibility">Eliminar foto</string>
     <string name="live_feed_compose_gif_btn">GIF</string>
     <string name="live_feed_add_reaction_accessibility">Añadir reacción</string>
+    <string name="live_feed_end_event_btn">Terminar evento</string>
+    <string name="live_feed_end_event_confirm_title">¿Terminar el evento?</string>
+    <string name="live_feed_end_event_confirm_message">Esto cerrará el feed en directo y pasará a la votación final. Esta acción no se puede deshacer.</string>
+    <string name="live_feed_end_event_confirm_btn">Terminar evento</string>
     <plurals name="live_feed_tier_points">
         <item quantity="one">+%d pto</item>
         <item quantity="other">+%d pts</item>
     </plurals>
-    <string name="event_details_live_feed_btn">Feed en Directo</string>
+
+    <!-- Gala Feature Strings -->
+    <string name="gala_title">Gala Final</string>
+    <string name="gala_coming_soon">Gala próximamente…</string>
+    <string name="gala_preliminary_standings">Clasificación previa</string>
+    <string name="gala_ballot_title">¿Quién fue el auténtico MVP?</string>
+    <string name="gala_vote_btn">Votar</string>
+    <string name="gala_vote_cast">✓ Tu voto ha sido emitido</string>
+    <string name="gala_my_votes_title">Tus votos</string>
+    <string name="gala_no_predictions">No enviaste predicciones antes del evento.</string>
+    <string name="gala_my_final_vote_label">Voto final</string>
+    <string name="gala_vote_confirm_title">Confirma tu voto</string>
+    <string name="gala_vote_confirm_message">Estás a punto de votar por %s. Esta acción no se puede deshacer.</string>
+    <string name="gala_vote_confirm_btn">Votar</string>
+    <string name="gala_votes_cast">%1$d / %2$d votos emitidos</string>
+    <string name="gala_waiting_votes">Esperando a que todos voten…</string>
+    <string name="gala_calculating_winner">Todos han votado. Calculando ganador…</string>
+    <string name="gala_mvp_title">MVP</string>
+    <string name="gala_take_photo_btn">📷  Foto de la gala</string>
+    <string name="gala_download_certificate_btn">🏅  Descargar certificado</string>
+    <string name="gala_photo_source_title">Foto de la gala</string>
+    <string name="gala_photo_camera">Cámara</string>
+    <string name="gala_photo_gallery">Galería</string>
+    <string name="gala_photo_section_title">Foto de la gala</string>
+    <string name="gala_download_photo_btn">⬇  Guardar foto</string>
+    <string name="gala_replace_photo_btn">📷  Reemplazar foto de la gala</string>
+    <string name="gala_photo_download_title">Foto Gala MVP</string>
 
     <!-- Score Graph Feature Strings -->
     <string name="score_graph_title">Gráfico de puntuación</string>

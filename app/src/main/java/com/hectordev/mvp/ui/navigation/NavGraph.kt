@@ -17,6 +17,7 @@ import com.hectordev.mvp.ui.features.event.CreateEventScreen
 import com.hectordev.mvp.ui.features.event.EventDetailsScreen
 import com.hectordev.mvp.ui.features.feed.LiveFeedScreen
 import com.hectordev.mvp.ui.features.feed.ScoreGraphScreen
+import com.hectordev.mvp.ui.features.gala.GalaScreen
 import com.hectordev.mvp.ui.features.home.HomeScreen
 
 @Composable
@@ -69,10 +70,11 @@ fun AppNavGraph(
                     navController.navigate(AppDestination.CreateEvent)
                 },
                 onEventClick = { eventId, status ->
-                    if (status == EventStatus.ON_GOING) {
-                        navController.navigate(AppDestination.LiveFeed(eventId))
-                    } else {
-                        navController.navigate(AppDestination.EventDetails(eventId))
+                    when (status) {
+                        EventStatus.ON_GOING -> navController.navigate(AppDestination.LiveFeed(eventId))
+                        EventStatus.VOTING_PHASE,
+                        EventStatus.FINISHED -> navController.navigate(AppDestination.Gala(eventId))
+                        else -> navController.navigate(AppDestination.EventDetails(eventId))
                     }
                 }
             )
@@ -95,7 +97,20 @@ fun AppNavGraph(
             LiveFeedScreen(
                 onBack = { navController.popBackStack() },
                 onGoToGraph = { navController.navigate(AppDestination.ScoreGraph(dest.eventId)) },
-                onGoToDetails = { navController.navigate(AppDestination.EventDetails(dest.eventId)) }
+                onGoToDetails = { navController.navigate(AppDestination.EventDetails(dest.eventId)) },
+                onGoToGala = {
+                    navController.navigate(AppDestination.Gala(dest.eventId)) {
+                        popUpTo(AppDestination.LiveFeed(dest.eventId)) { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        composable<AppDestination.Gala> { backStackEntry ->
+            val dest = backStackEntry.toRoute<AppDestination.Gala>()
+            GalaScreen(
+                onBack = { navController.popBackStack() },
+                onGoToGraph = { navController.navigate(AppDestination.ScoreGraph(dest.eventId)) }
             )
         }
 

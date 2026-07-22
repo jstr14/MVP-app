@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.google.firebase.auth.FirebaseAuth
+import com.hectordev.mvp.domain.EventStatus
 import com.hectordev.mvp.domain.NoteType
 import com.hectordev.mvp.domain.TimelineNote
 import com.hectordev.mvp.domain.TimelineTier
@@ -55,6 +56,7 @@ class LiveFeedViewModel @Inject constructor(
                             eventTitle = event?.title ?: "",
                             participants = participants,
                             isAdmin = event?.adminId == currentUserId,
+                            navigateToGala = event?.status == EventStatus.VOTING_PHASE,
                             isLoading = false
                         )
                     }
@@ -137,6 +139,20 @@ class LiveFeedViewModel @Inject constructor(
                 _uiState.update { it.copy(error = e.localizedMessage) }
             }
         }
+    }
+
+    fun endEvent() {
+        viewModelScope.launch {
+            try {
+                eventsRepository.updateStatus(eventId, EventStatus.VOTING_PHASE)
+            } catch (e: Exception) {
+                _uiState.update { it.copy(error = e.localizedMessage) }
+            }
+        }
+    }
+
+    fun clearNavigateToGala() {
+        _uiState.update { it.copy(navigateToGala = false) }
     }
 
     fun clearPostSuccess() {

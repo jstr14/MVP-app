@@ -210,6 +210,43 @@ class EventsRepositoryDefault @Inject constructor(
         return ref.downloadUrl.await().toString()
     }
 
+    override suspend fun submitVote(eventId: String, voterId: String, votedForId: String) {
+        eventsCollection.document(eventId)
+            .collection("final_votes")
+            .document(voterId)
+            .set(mapOf("votedForCandidateId" to votedForId))
+            .await()
+    }
+
+    override fun observeVoteCount(eventId: String): Flow<Int> = callbackFlow {
+        val subscription = eventsCollection.document(eventId)
+            .collection("final_votes")
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) { close(error); return@addSnapshotListener }
+                trySend(snapshot?.size() ?: 0)
+            }
+        awaitClose { subscription.remove() }
+    }
+
+    override fun observeUserVoteTarget(eventId: String, userId: String): Flow<String?> = callbackFlow {
+        val subscription = eventsCollection.document(eventId)
+            .collection("final_votes")
+            .document(userId)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) { close(error); return@addSnapshotListener }
+                trySend(snapshot?.getString("votedForCandidateId"))
+            }
+        awaitClose { subscription.remove() }
+    }
+
+    override suspend fun uploadGalaPhoto(eventId: String, imageUri: Uri): String {
+        val ref = storage.reference.child("events/$eventId/gala_photo.jpg")
+        ref.putBytes(imageCompressor.compress(imageUri)).await()
+        val url = ref.downloadUrl.await().toString()
+        eventsCollection.document(eventId).update("galaPhotoUrl", url).await()
+        return url
+    }
+
     override fun observePendingInvitations(userId: String): Flow<List<Event>> = callbackFlow {
         if (userId.isEmpty()) { trySend(emptyList()); awaitClose { }; return@callbackFlow }
         val subscription = eventsCollection

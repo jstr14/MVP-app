@@ -11,6 +11,7 @@ data class LiveFeedUiState(
     val isAdmin: Boolean = false,
     val isPosting: Boolean = false,
     val postSuccess: Boolean = false,
+    val navigateToGala: Boolean = false,
     val isLoading: Boolean = true,
     val error: String? = null
 )
