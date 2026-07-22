@@ -69,9 +69,10 @@ The Live Event Feed is a single screen with the following structure:
 Each card displays:
 * Author avatar + name → Target avatar + name (both shown)
 * Tier badge with label and point value (e.g., `HOT TAKE +2 pts`)
-* Note content (text, photo, or GIF)
+* Note content (text, photo, or GIF) — tapping a photo opens a full-screen viewer (`FullScreenPhotoViewer`, reusable core component)
 * Timestamp
 * Delete button — visible to the Event Admin (can delete any note) and to the note's author (can delete their own notes only). Deleting a note subtracts its tier points from the targeted user's score in real time.
+* Emoji reaction row with real-time counts, add-reaction picker, and the custom `ic_add_reaction` icon
 
 #### Compose Bottom Sheet (tier-first flow)
 1. **Tier selection** — four options always displaying label and point value together: `Fact +1`, `Hot Take +2`, `Witnessed +5`, `Lore +10`.
@@ -91,8 +92,9 @@ Each card displays:
     * **Event Log Feed:** Points are accumulated exclusively when a user publishes a timeline note (Text, Photo, or GIF) and explicitly targets/nominates another participant (self-targeting is locked).
     * **Tier Selection:** Before posting, the author picks a tier that defines the weight of the nomination. The label and point value are always shown together. Four tiers available: **Fact** (+1), **Hot Take** (+2), **Witnessed** (+5), **Lore** (+10). Tier labels are subject to change and the system may expand in future iterations.
     * **Note Card Display:** Each published note shows its tier label and point value so all participants can see the weight assigned.
-    * **Social Interactions:** Other players can react with emojis on notes to build engagement, but reactions do not award additional points.
+    * **Social Interactions:** ✅ Emoji reactions (😂 🔥 😭 👀 🤡 🫡 🚨 🤮) with real-time counts and a custom add-reaction chip.
     * **Note Deletion:** Admin can delete any note; the note's own author can also delete their own notes. Deletion subtracts the tier's assigned points from the targeted user's score in real time.
+* **Full-Screen Photo Viewer** — tapping a photo in a note card opens a full-screen `FullScreenPhotoViewer` composable (black backdrop, `ContentScale.Fit`, tap or ✕ to dismiss). Reusable core component also used in the Gala screen. *(to implement in NoteCard)*
 * **Emergency Vote / Basic Services ("Cláusula Hospitalaria / Policía"):** *(deferred — implement after Sprint 4 event-end flow is complete)*
 
     **Trigger flow:**
@@ -117,14 +119,58 @@ Each card displays:
     **One-Shot Rule:** Once a user's emergency attempt ends in REJECTED or TIMED_OUT, the `⚡` button is permanently disabled for them for the remainder of this event (enforced via `usedEmergencyClause[]` on the event document).
 
 ### 🔴 Sprint 4: The Final Awards Gala & Certification Engine
-* **Closing the Live Event (Admin):** An admin-only "End Event" button in the `LiveFeedScreen` TopAppBar (with a confirmation dialog) transitions the event from `ON_GOING` to `VOTING_PHASE`. All participants' Firestore listeners detect the status change in real time and auto-navigate to the Voting/Gala screen.
-* **The Blind Ballot & Scoring Context:**
-  * **The app transitions to an interactive screen displaying the preliminary standings scoreboard (e.g., "Top 3 are John, Nancy, and Jack" or a full metrics table) alongside a line chart tracking the timeline performance.**
-  * **Every user must cast a secret blind vote for the final winner (self-voting programmatically locked).**
-* **The Ultimate MVP Resolution: The official event MVP title is awarded strictly to the user who receives the most votes in this final ballot.**
-* **The Final Gala Upload: Once the vote is resolved, the group has the option to upload a final gala photo to Cloud Storage (gala_photo.jpg).**
-* **Automated Prediction Resolution: The system's background engine automatically audits pre-trip predictions against final database standings—completely bypassing any manual Admin validation screens. Correct guesses are pushed to the users' profiles as badges.**
-* **Diploma Export System: Dynamic composable layout generating localized custom awards containing profile data, performance stats, and the gala photo uploaded at the end (if available, otherwise it renders clean without it). The winner can download it locally as a PDF/PNG anytime.**
+
+#### ✅ Closing the Live Event (Admin)
+An admin-only "End Event" button in the `LiveFeedScreen` TopAppBar (with a confirmation dialog) transitions the event from `ON_GOING` to `VOTING_PHASE`. All participants' Firestore listeners detect the status change in real time and auto-navigate to the Gala screen.
+
+#### ✅ Gala Screen Layout & Flow
+
+**State 1 — Voting in progress (`VOTING_PHASE`, not all votes cast):**
+* ✅ **Preliminary Standings** — top 3 participants by cumulative `points_log` total, displayed with medal icons (🥇🥈🥉), avatar, name, and points. No graph.
+* ✅ **Blind Ballot** — participant chip row (self excluded, one selectable at a time). Once submitted, the ballot is hidden and replaced with a confirmation line. Self-voting is programmatically locked.
+* ✅ **Vote counter** — `"X / Y votes cast"` updates in real time. When all votes are in, shows "Calculating winner…" with a spinner while the Cloud Function runs.
+
+**State 2 — Winner revealed (`FINISHED`, `mvpId` set):**
+* ✅ **MVP Winner card** — prominent display with avatar, trophy icon, and name.
+* ✅ **Preliminary Standings** — same top 3 strip as above.
+* ✅ **Your Votes section** — shown in both VOTING_PHASE and FINISHED: pre-event predictions (🔮 MVP Pick + 🏀 Triple Pick) and the blind ballot final vote (🗳). Predictions use the existing `predictions/{userId}` subcollection; final vote target from `final_votes/{userId}`.
+* ✅ **Gala Photo** — admin uploads via camera or gallery. Once uploaded, visible to all participants as a tappable thumbnail (opens `FullScreenPhotoViewer`). All participants can save the photo to their device via `DownloadManager`. Admin can replace the photo after upload.
+* ✅ **Download Certificate** — visible to the MVP winner only (stub button, full implementation pending).
+* ✅ **Access from Home** — `FINISHED` and `VOTING_PHASE` events navigate directly to the Gala screen from Home. Past events section is now tappable.
+
+**Navigation:**
+* `VOTING_PHASE` → Gala screen (direct from Home)
+* `FINISHED` → Gala screen (from past events section, read-only view mode for photo and certificate)
+* `Graph` button in Gala TopAppBar → Score Progression Graph screen
+
+#### MVP Resolution — Cloud Function (`resolveGalaWinner`)
+Winner resolution runs entirely server-side to avoid client-side race conditions.
+
+* **Trigger:** `onDocumentCreated("events/{eventId}/final_votes/{voterId}")`
+* **Logic:**
+  1. Count documents in `final_votes`. If count < `participants.length` → exit, not done yet.
+  2. Tally `votedForCandidateId` across all votes.
+  3. Winner = candidate with most votes.
+  4. **Tiebreaker chain** (applied in order until a single winner emerges):
+     * **T1** — highest cumulative `pointsAwarded` total from `points_log`
+     * **T2** — most unique nominators (distinct `authorId` values in `points_log`)
+     * **T3** — most recent note received (latest `timestamp` in `points_log`)
+  5. Write `{ mvpId: winnerId, status: "FINISHED" }` to the event document.
+* All clients detect `status == FINISHED` via their existing `observeEvent` listener and update the Gala screen automatically.
+
+#### Automated Prediction Resolution *(pending)*
+After `status → FINISHED`, the system checks each participant's submitted prediction against the final `mvpId`:
+* `projectedMvpId == mvpId` → Oracle badge awarded (`stats.oraclePredictionsCorrect++`)
+* `tripleParticipantId` resolution logic → Triple badge (criteria TBD)
+* Written to `/users/{userId}/stats`.
+
+#### Diploma Export System *(pending)*
+Dynamic Compose layout generating a localized certificate for the MVP winner containing:
+* Winner's profile data (name, avatar)
+* Event title, date range, location
+* Final standings (top 3)
+* Gala photo (if uploaded, otherwise renders clean without it)
+* Winner can download as PDF/PNG from the Gala screen certificate button (currently a stub).
 
 ### 🔵 Sprint 5: Hall of Fame & Global Standings
 * **Leaderboard Dashboard:** Aggregate historical leaderboard computing performance points, total lifetime MVPs, and win ratios across all past events.

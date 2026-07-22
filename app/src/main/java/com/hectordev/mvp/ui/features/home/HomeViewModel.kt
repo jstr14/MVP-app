@@ -55,8 +55,9 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 eventsRepository.observeParticipantEvents(currentUserId).collect { events ->
-                    // Active: ON_GOING first, then PREDICTION, then earliest PRE_TRIP
-                    val active = events.firstOrNull { it.status == EventStatus.ON_GOING }
+                    // Active: VOTING_PHASE first (gala in progress), then ON_GOING, then PREDICTION, then earliest PRE_TRIP
+                    val active = events.firstOrNull { it.status == EventStatus.VOTING_PHASE }
+                        ?: events.firstOrNull { it.status == EventStatus.ON_GOING }
                         ?: events.firstOrNull { it.status == EventStatus.PREDICTION }
                         ?: events.filter { it.status == EventStatus.PRE_TRIP }.minByOrNull { it.startDate }
 
@@ -65,7 +66,9 @@ class HomeViewModel @Inject constructor(
                         .filter { it.status != EventStatus.FINISHED && it.id != active?.id }
                         .sortedBy { it.startDate }
 
-                    val past = events.filter { it.status == EventStatus.FINISHED }
+                    val past = events
+                        .filter { it.status == EventStatus.FINISHED }
+                        .sortedByDescending { it.endDate }
 
                     // Enrich active event participants
                     val activeParticipants = if (active != null) {

@@ -104,6 +104,29 @@
     <!-- Gala Feature Strings -->
     <string name="gala_title">Gala Final</string>
     <string name="gala_coming_soon">Gala próximamente…</string>
+    <string name="gala_preliminary_standings">Clasificación previa</string>
+    <string name="gala_ballot_title">¿Quién fue el auténtico MVP?</string>
+    <string name="gala_vote_btn">Votar</string>
+    <string name="gala_vote_cast">✓ Tu voto ha sido emitido</string>
+    <string name="gala_my_votes_title">Tus votos</string>
+    <string name="gala_no_predictions">No enviaste predicciones antes del evento.</string>
+    <string name="gala_my_final_vote_label">Voto final</string>
+    <string name="gala_vote_confirm_title">Confirma tu voto</string>
+    <string name="gala_vote_confirm_message">Estás a punto de votar por %s. Esta acción no se puede deshacer.</string>
+    <string name="gala_vote_confirm_btn">Votar</string>
+    <string name="gala_votes_cast">%1$d / %2$d votos emitidos</string>
+    <string name="gala_waiting_votes">Esperando a que todos voten…</string>
+    <string name="gala_calculating_winner">Todos han votado. Calculando ganador…</string>
+    <string name="gala_mvp_title">MVP</string>
+    <string name="gala_take_photo_btn">📷  Foto de la gala</string>
+    <string name="gala_download_certificate_btn">🏅  Descargar certificado</string>
+    <string name="gala_photo_source_title">Foto de la gala</string>
+    <string name="gala_photo_camera">Cámara</string>
+    <string name="gala_photo_gallery">Galería</string>
+    <string name="gala_photo_section_title">Foto de la gala</string>
+    <string name="gala_download_photo_btn">⬇  Guardar foto</string>
+    <string name="gala_replace_photo_btn">📷  Reemplazar foto de la gala</string>
+    <string name="gala_photo_download_title">Foto Gala MVP</string>
 
     <!-- Score Graph Feature Strings -->
     <string name="score_graph_title">Gráfico de puntuación</string>

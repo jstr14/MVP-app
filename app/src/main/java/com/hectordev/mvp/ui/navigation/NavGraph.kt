@@ -70,10 +70,11 @@ fun AppNavGraph(
                     navController.navigate(AppDestination.CreateEvent)
                 },
                 onEventClick = { eventId, status ->
-                    if (status == EventStatus.ON_GOING) {
-                        navController.navigate(AppDestination.LiveFeed(eventId))
-                    } else {
-                        navController.navigate(AppDestination.EventDetails(eventId))
+                    when (status) {
+                        EventStatus.ON_GOING -> navController.navigate(AppDestination.LiveFeed(eventId))
+                        EventStatus.VOTING_PHASE,
+                        EventStatus.FINISHED -> navController.navigate(AppDestination.Gala(eventId))
+                        else -> navController.navigate(AppDestination.EventDetails(eventId))
                     }
                 }
             )
@@ -105,8 +106,12 @@ fun AppNavGraph(
             )
         }
 
-        composable<AppDestination.Gala> {
-            GalaScreen(onBack = { navController.popBackStack() })
+        composable<AppDestination.Gala> { backStackEntry ->
+            val dest = backStackEntry.toRoute<AppDestination.Gala>()
+            GalaScreen(
+                onBack = { navController.popBackStack() },
+                onGoToGraph = { navController.navigate(AppDestination.ScoreGraph(dest.eventId)) }
+            )
         }
 
         composable<AppDestination.ScoreGraph> {
