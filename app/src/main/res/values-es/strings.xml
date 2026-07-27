@@ -76,6 +76,12 @@
     <string name="event_details_prediction_success">¡Predicción guardada correctamente!</string>
     <string name="event_details_live_feed_btn">Feed en Directo</string>
 
+    <!-- Tier Label Strings (display only — storage keys remain in English) -->
+    <string name="tier_fact">Facto</string>
+    <string name="tier_hot_take">Hot Take</string>
+    <string name="tier_witnessed">Presenciado</string>
+    <string name="tier_lore">Leyenda</string>
+
     <!-- Live Feed Feature Strings -->
     <string name="live_feed_graph_btn">Gráfico</string>
     <string name="live_feed_event_details_accessibility">Detalles del evento</string>
@@ -127,6 +133,7 @@
     <string name="gala_download_photo_btn">⬇  Guardar foto</string>
     <string name="gala_replace_photo_btn">📷  Reemplazar foto de la gala</string>
     <string name="gala_photo_download_title">Foto Gala MVP</string>
+    <string name="gala_view_feed_btn">Ver feed del evento</string>
 
     <!-- Score Graph Feature Strings -->
     <string name="score_graph_title">Gráfico de puntuación</string>

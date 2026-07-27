@@ -8,10 +8,21 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.hectordev.mvp.R
 import com.hectordev.mvp.domain.TimelineTier
+
+@Composable
+fun TimelineTier.displayName(): String = stringResource(
+    when (this) {
+        TimelineTier.FACT -> R.string.tier_fact
+        TimelineTier.HOT_TAKE -> R.string.tier_hot_take
+        TimelineTier.WITNESSED -> R.string.tier_witnessed
+        TimelineTier.LORE -> R.string.tier_lore
+    }
+)
 
 @Composable
 fun TierBadge(tier: TimelineTier, modifier: Modifier = Modifier) {
@@ -27,7 +38,7 @@ fun TierBadge(tier: TimelineTier, modifier: Modifier = Modifier) {
         modifier = modifier
     ) {
         Text(
-            text = "${tier.label.uppercase()}  ${pluralStringResource(R.plurals.live_feed_tier_points, tier.points, tier.points)}",
+            text = "${tier.displayName().uppercase()}  ${pluralStringResource(R.plurals.live_feed_tier_points, tier.points, tier.points)}",
             style = MaterialTheme.typography.labelSmall,
             fontWeight = FontWeight.Bold,
             color = contentColor,

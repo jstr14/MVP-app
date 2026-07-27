@@ -28,6 +28,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material.icons.filled.DynamicFeed
+import androidx.compose.material.icons.filled.ShowChart
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -54,6 +56,7 @@ import com.hectordev.mvp.ui.features.feed.createTempImageUri
 fun GalaScreen(
     onBack: () -> Unit,
     onGoToGraph: () -> Unit,
+    onViewFeed: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: GalaViewModel = hiltViewModel()
 ) {
@@ -62,6 +65,7 @@ fun GalaScreen(
         uiState = uiState,
         onBack = onBack,
         onGoToGraph = onGoToGraph,
+        onViewFeed = onViewFeed,
         onSelectCandidate = viewModel::selectCandidate,
         onSubmitVote = viewModel::submitVote,
         onUploadGalaPhoto = viewModel::uploadGalaPhoto,
@@ -76,6 +80,7 @@ internal fun GalaContent(
     uiState: GalaUiState,
     onBack: () -> Unit,
     onGoToGraph: () -> Unit,
+    onViewFeed: () -> Unit,
     onSelectCandidate: (String) -> Unit,
     onSubmitVote: () -> Unit,
     onUploadGalaPhoto: (Uri) -> Unit,
@@ -146,8 +151,11 @@ internal fun GalaContent(
                     }
                 },
                 actions = {
-                    TextButton(onClick = onGoToGraph) {
-                        Text(stringResource(R.string.live_feed_graph_btn))
+                    IconButton(onClick = onGoToGraph) {
+                        Icon(Icons.Default.ShowChart, contentDescription = stringResource(R.string.score_graph_title))
+                    }
+                    IconButton(onClick = onViewFeed) {
+                        Icon(Icons.Default.DynamicFeed, contentDescription = stringResource(R.string.gala_view_feed_btn))
                     }
                 }
             )

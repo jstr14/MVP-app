@@ -92,10 +92,10 @@ Each card displays:
     * **Event Log Feed:** Points are accumulated exclusively when a user publishes a timeline note (Text, Photo, or GIF) and explicitly targets/nominates another participant (self-targeting is locked).
     * **Tier Selection:** Before posting, the author picks a tier that defines the weight of the nomination. The label and point value are always shown together. Four tiers available: **Fact** (+1), **Hot Take** (+2), **Witnessed** (+5), **Lore** (+10). Tier labels are subject to change and the system may expand in future iterations.
     * **Note Card Display:** Each published note shows its tier label and point value so all participants can see the weight assigned.
-    * **Social Interactions:** ✅ Emoji reactions (😂 🔥 😭 👀 🤡 🫡 🚨 🤮) with real-time counts and a custom add-reaction chip.
+    * **Social Interactions:** ✅ Emoji reactions (😂 🔥 😭 👀 🤡 👆 🚨 🤮 💩 👻) with real-time counts and a custom add-reaction chip.
     * **Note Deletion:** Admin can delete any note; the note's own author can also delete their own notes. Deletion subtracts the tier's assigned points from the targeted user's score in real time.
 * **Full-Screen Photo Viewer** — tapping a photo in a note card opens a full-screen `FullScreenPhotoViewer` composable (black backdrop, `ContentScale.Fit`, tap or ✕ to dismiss). Reusable core component also used in the Gala screen. *(to implement in NoteCard)*
-* **Emergency Vote / Basic Services ("Cláusula Hospitalaria / Policía"):** *(deferred — implement after Sprint 4 event-end flow is complete)*
+* **Emergency Vote ("Servicios básicos"):** *(deferred — implement after Sprint 4 event-end flow is complete)*
 
     **Trigger flow:**
     * Any participant can tap the `⚡` TopAppBar icon in `LiveFeedScreen` to initiate the Emergency Clause. The button is disabled if the user has already spent their one-shot or if an emergency is already active.

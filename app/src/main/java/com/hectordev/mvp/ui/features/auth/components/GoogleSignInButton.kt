@@ -37,7 +37,9 @@ fun GoogleSignInButton(
         enabled = enabled && !isLoading,
         colors = ButtonDefaults.outlinedButtonColors(
             containerColor = Color.White,
-            contentColor = Color(0xFF1F1F1F)
+            contentColor = Color(0xFF1F1F1F),
+            disabledContainerColor = Color.White,
+            disabledContentColor = Color(0xFF1F1F1F)
         ),
         border = BorderStroke(1.dp, Color(0xFF747775)),
         modifier = modifier
@@ -86,6 +88,16 @@ private fun GoogleButtonNormalPreview() {
 @Preview(name = "Loading State", showBackground = true)
 @Composable
 private fun GoogleButtonLoadingPreview() {
+    MVPTheme {
+        Surface(modifier = Modifier.padding(16.dp)) {
+            GoogleSignInButton(onClick = {}, isLoading = true)
+        }
+    }
+}
+
+@Preview(name = "Loading State — Dark", showBackground = true, uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun GoogleButtonLoadingDarkPreview() {
     MVPTheme {
         Surface(modifier = Modifier.padding(16.dp)) {
             GoogleSignInButton(onClick = {}, isLoading = true)

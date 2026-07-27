@@ -81,6 +81,11 @@ class ScoreGraphViewModel @Inject constructor(
         val current = participantIds.associateWith { 0f }.toMutableMap()
         val result = participantIds.associateWith { mutableListOf<Float>() }.toMutableMap()
 
+        if (sortedNotes.isNotEmpty()) {
+            // Prepend a zero starting point so Vico always has ≥ 2 data points to draw a line
+            participantIds.forEach { uid -> result[uid]?.add(0f) }
+        }
+
         sortedNotes.forEach { note ->
             current[note.targetUserId] = (current[note.targetUserId] ?: 0f) + note.pointsAwarded
             participantIds.forEach { uid ->

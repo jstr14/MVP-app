@@ -49,7 +49,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-internal val REACTION_EMOJIS = listOf("😂", "🔥", "😭", "👀", "🤡", "🫡", "🚨", "🤮")
+internal val REACTION_EMOJIS = listOf("😂", "🔥", "😭", "👀", "🤡", "👆", "🚨", "🤮", "💩", "👻")
 
 @Composable
 internal fun NoteCard(
@@ -59,6 +59,7 @@ internal fun NoteCard(
     currentUserId: String,
     onDelete: () -> Unit,
     onToggleReaction: (String) -> Unit,
+    viewerMode: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     val author = participants.find { it.id == note.authorId }
@@ -90,7 +91,7 @@ internal fun NoteCard(
                     )
                     UserChip(user = target)
                 }
-                if (isAdmin || currentUserId == note.authorId) {
+                if (!viewerMode && (isAdmin || currentUserId == note.authorId)) {
                     IconButton(onClick = onDelete, modifier = Modifier.size(32.dp)) {
                         Icon(
                             imageVector = Icons.Default.Delete,
@@ -130,11 +131,13 @@ internal fun NoteCard(
                 Text(text = it, style = MaterialTheme.typography.bodyMedium)
             }
 
-            ReactionRow(
-                reactions = note.reactions,
-                currentUserId = currentUserId,
-                onToggleReaction = onToggleReaction
-            )
+            if (!viewerMode) {
+                ReactionRow(
+                    reactions = note.reactions,
+                    currentUserId = currentUserId,
+                    onToggleReaction = onToggleReaction
+                )
+            }
 
             Text(
                 text = note.timestamp.toHourMinute(),
