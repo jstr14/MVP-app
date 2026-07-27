@@ -102,7 +102,8 @@ fun AppNavGraph(
                     navController.navigate(AppDestination.Gala(dest.eventId)) {
                         popUpTo(AppDestination.LiveFeed(dest.eventId)) { inclusive = true }
                     }
-                }
+                },
+                viewerMode = dest.viewerMode
             )
         }
 
@@ -110,7 +111,8 @@ fun AppNavGraph(
             val dest = backStackEntry.toRoute<AppDestination.Gala>()
             GalaScreen(
                 onBack = { navController.popBackStack() },
-                onGoToGraph = { navController.navigate(AppDestination.ScoreGraph(dest.eventId)) }
+                onGoToGraph = { navController.navigate(AppDestination.ScoreGraph(dest.eventId)) },
+                onViewFeed = { navController.navigate(AppDestination.LiveFeed(dest.eventId, viewerMode = true)) }
             )
         }
 

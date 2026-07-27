@@ -72,6 +72,7 @@ import coil.compose.AsyncImage
 import com.hectordev.mvp.R
 import com.hectordev.mvp.domain.TimelineTier
 import com.hectordev.mvp.domain.User
+import com.hectordev.mvp.ui.core.components.displayName
 import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -351,7 +352,7 @@ private fun TierOption(
             verticalArrangement = Arrangement.spacedBy(2.dp)
         ) {
             Text(
-                text = tier.label,
+                text = tier.displayName(),
                 style = MaterialTheme.typography.labelLarge,
                 fontWeight = FontWeight.Bold,
                 color = contentColor

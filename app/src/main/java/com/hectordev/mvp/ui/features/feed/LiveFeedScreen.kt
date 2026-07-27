@@ -14,6 +14,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.HowToVote
+import androidx.compose.material.icons.filled.ShowChart
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
@@ -51,6 +53,7 @@ fun LiveFeedScreen(
     onGoToGraph: () -> Unit,
     onGoToDetails: () -> Unit,
     onGoToGala: () -> Unit,
+    viewerMode: Boolean = false,
     modifier: Modifier = Modifier,
     viewModel: LiveFeedViewModel = hiltViewModel()
 ) {
@@ -68,6 +71,7 @@ fun LiveFeedScreen(
         onDeleteNote = viewModel::deleteNote,
         onToggleReaction = viewModel::toggleReaction,
         onErrorShown = viewModel::clearError,
+        viewerMode = viewerMode,
         modifier = modifier
     )
 }
@@ -87,6 +91,7 @@ internal fun LiveFeedContent(
     onDeleteNote: (TimelineNote) -> Unit,
     onToggleReaction: (TimelineNote, String) -> Unit,
     onErrorShown: () -> Unit,
+    viewerMode: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
@@ -159,26 +164,28 @@ internal fun LiveFeedContent(
                     }
                 },
                 actions = {
-                    if (uiState.isAdmin) {
-                        TextButton(onClick = { showEndEventConfirmation = true }) {
-                            Text(
-                                text = stringResource(R.string.live_feed_end_event_btn),
-                                color = MaterialTheme.colorScheme.error
+                    if (uiState.isAdmin && !viewerMode) {
+                        IconButton(onClick = { showEndEventConfirmation = true }) {
+                            Icon(
+                                Icons.Default.HowToVote,
+                                contentDescription = stringResource(R.string.live_feed_end_event_btn)
                             )
                         }
                     }
                     IconButton(onClick = onGoToDetails) {
                         Icon(Icons.Default.Info, contentDescription = stringResource(R.string.live_feed_event_details_accessibility))
                     }
-                    TextButton(onClick = onGoToGraph) {
-                        Text(stringResource(R.string.live_feed_graph_btn))
+                    IconButton(onClick = onGoToGraph) {
+                        Icon(Icons.Default.ShowChart, contentDescription = stringResource(R.string.live_feed_graph_btn))
                     }
                 }
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = { showComposeSheet = true }) {
-                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.live_feed_post_note_accessibility))
+            if (!viewerMode) {
+                FloatingActionButton(onClick = { showComposeSheet = true }) {
+                    Icon(Icons.Default.Add, contentDescription = stringResource(R.string.live_feed_post_note_accessibility))
+                }
             }
         }
     ) { paddingValues ->
@@ -221,7 +228,8 @@ internal fun LiveFeedContent(
                     isAdmin = uiState.isAdmin,
                     currentUserId = uiState.currentUserId,
                     onDelete = { onDeleteNote(note) },
-                    onToggleReaction = { emoji -> onToggleReaction(note, emoji) }
+                    onToggleReaction = { emoji -> onToggleReaction(note, emoji) },
+                    viewerMode = viewerMode
                 )
             }
         }

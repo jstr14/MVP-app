@@ -21,7 +21,7 @@ sealed interface AppDestination {
     data class EventDetails(val eventId: String) : AppDestination
 
     @Serializable
-    data class LiveFeed(val eventId: String) : AppDestination
+    data class LiveFeed(val eventId: String, val viewerMode: Boolean = false) : AppDestination
 
     @Serializable
     data class ScoreGraph(val eventId: String) : AppDestination
