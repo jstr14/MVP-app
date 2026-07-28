@@ -19,6 +19,7 @@ import com.hectordev.mvp.ui.features.feed.LiveFeedScreen
 import com.hectordev.mvp.ui.features.feed.ScoreGraphScreen
 import com.hectordev.mvp.ui.features.gala.GalaScreen
 import com.hectordev.mvp.ui.features.home.HomeScreen
+import com.hectordev.mvp.ui.features.profile.BadgesScreen
 
 @Composable
 fun AppNavGraph(
@@ -76,8 +77,13 @@ fun AppNavGraph(
                         EventStatus.FINISHED -> navController.navigate(AppDestination.Gala(eventId))
                         else -> navController.navigate(AppDestination.EventDetails(eventId))
                     }
-                }
+                },
+                onNavigateToBadges = { navController.navigate(AppDestination.Badges) }
             )
+        }
+
+        composable<AppDestination.Badges> {
+            BadgesScreen(onBack = { navController.popBackStack() })
         }
 
         composable<AppDestination.EventDetails> { backStackEntry ->

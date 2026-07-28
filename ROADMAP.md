@@ -56,7 +56,7 @@
 
 #### Screen Layout
 The Live Event Feed is a single screen with the following structure:
-* **TopAppBar:** Event title in the center. Actions on the right: `ℹ️` icon (navigates to Event Details — participants, predictions, event info) and a `Graph` text button (navigates to the Points Progression Graph screen). The `⚡` Emergency Clause button is deferred to a future implementation. No persistent scoreboard banner — the feed cards communicate score changes in real time.
+* **TopAppBar:** Event title in the center. Actions on the right: `HowToVote` icon (admin only — End Event with confirmation dialog), `Info` icon (navigates to Event Details), `ShowChart` icon (navigates to Score Graph). The `⚡` Emergency Clause button is deferred. No persistent scoreboard banner.
 * **Timeline:** Full-height `LazyColumn` of note cards ordered by most recent first (descending timestamp).
 * **FAB:** `+ Post` button anchored to the bottom right, opens the Compose Bottom Sheet.
 
@@ -90,11 +90,11 @@ Each card displays:
 * ✅ **Points Progression Graph Screen:** Dedicated screen accessible via the `Graph` TopAppBar text button. Displays a Vico Charts line chart tracking each participant's cumulative score over time (one line per participant, colour-coded). Standings list below the chart sorted by total score.
 * ✅ **Peer-Driven Scoring System:**
     * **Event Log Feed:** Points are accumulated exclusively when a user publishes a timeline note (Text, Photo, or GIF) and explicitly targets/nominates another participant (self-targeting is locked).
-    * **Tier Selection:** Before posting, the author picks a tier that defines the weight of the nomination. The label and point value are always shown together. Four tiers available: **Fact** (+1), **Hot Take** (+2), **Witnessed** (+5), **Lore** (+10). Tier labels are subject to change and the system may expand in future iterations.
+    * **Tier Selection:** Before posting, the author picks a tier that defines the weight of the nomination. The label and point value are always shown together. Four tiers available: **Fact** (+1), **Hot Take** (+2), **Witnessed** (+5), **Lore** (+10). Tier labels are subject to change and the system may expand in future iterations. Display names are localised via `displayName()` Composable extension (EN: Fact / Hot Take / Witnessed / Lore; ES: Facto / Hot Take / Presenciado / Leyenda) while Firestore storage keys remain in English.
     * **Note Card Display:** Each published note shows its tier label and point value so all participants can see the weight assigned.
     * **Social Interactions:** ✅ Emoji reactions (😂 🔥 😭 👀 🤡 👆 🚨 🤮 💩 👻) with real-time counts and a custom add-reaction chip.
     * **Note Deletion:** Admin can delete any note; the note's own author can also delete their own notes. Deletion subtracts the tier's assigned points from the targeted user's score in real time.
-* **Full-Screen Photo Viewer** — tapping a photo in a note card opens a full-screen `FullScreenPhotoViewer` composable (black backdrop, `ContentScale.Fit`, tap or ✕ to dismiss). Reusable core component also used in the Gala screen. *(to implement in NoteCard)*
+* ✅ **Full-Screen Photo Viewer** — tapping a photo or GIF in a note card opens a full-screen `FullScreenPhotoViewer` composable (black backdrop, `ContentScale.Fit`, tap or ✕ to dismiss). Reusable core component also used in the Gala screen.
 * **Emergency Vote ("Servicios básicos"):** *(deferred — implement after Sprint 4 event-end flow is complete)*
 
     **Trigger flow:**
@@ -135,13 +135,16 @@ An admin-only "End Event" button in the `LiveFeedScreen` TopAppBar (with a confi
 * ✅ **Preliminary Standings** — same top 3 strip as above.
 * ✅ **Your Votes section** — shown in both VOTING_PHASE and FINISHED: pre-event predictions (🔮 MVP Pick + 🏀 Triple Pick) and the blind ballot final vote (🗳). Predictions use the existing `predictions/{userId}` subcollection; final vote target from `final_votes/{userId}`.
 * ✅ **Gala Photo** — admin uploads via camera or gallery. Once uploaded, visible to all participants as a tappable thumbnail (opens `FullScreenPhotoViewer`). All participants can save the photo to their device via `DownloadManager`. Admin can replace the photo after upload.
-* ✅ **Download Certificate** — visible to the MVP winner only (stub button, full implementation pending).
+* ✅ **Download Certificate** — visible to the MVP winner only. Generates a landscape A4 PDF saved directly to the Downloads folder. See Diploma Export section below.
 * ✅ **Access from Home** — `FINISHED` and `VOTING_PHASE` events navigate directly to the Gala screen from Home. Past events section is now tappable.
 
 **Navigation:**
 * `VOTING_PHASE` → Gala screen (direct from Home)
 * `FINISHED` → Gala screen (from past events section, read-only view mode for photo and certificate)
-* `Graph` button in Gala TopAppBar → Score Progression Graph screen
+* `ShowChart` icon in Gala TopAppBar → Score Progression Graph screen
+* `DynamicFeed` icon in Gala TopAppBar → Live Feed in viewer mode (read-only: no FAB, no delete, no reactions, no End Event button)
+
+**Live Feed viewer mode** (`viewerMode = true`): accessible from Gala screen for completed events. Shows the full chronological note timeline in read-only state — tapping photos/GIFs still opens `FullScreenPhotoViewer`.
 
 #### MVP Resolution — Cloud Function (`resolveGalaWinner`)
 Winner resolution runs entirely server-side to avoid client-side race conditions.
@@ -158,19 +161,43 @@ Winner resolution runs entirely server-side to avoid client-side race conditions
   5. Write `{ mvpId: winnerId, status: "FINISHED" }` to the event document.
 * All clients detect `status == FINISHED` via their existing `observeEvent` listener and update the Gala screen automatically.
 
-#### Automated Prediction Resolution *(pending)*
-After `status → FINISHED`, the system checks each participant's submitted prediction against the final `mvpId`:
-* `projectedMvpId == mvpId` → Oracle badge awarded (`stats.oraclePredictionsCorrect++`)
-* `tripleParticipantId` resolution logic → Triple badge (criteria TBD)
-* Written to `/users/{userId}/stats`.
+#### ✅ Badges Screen
+Accessible from the Home screen profile avatar dropdown. Displays the current user's achievements with count and earned/locked states. Earned badges show `× N` count in primary color; locked badges show a 🔒 icon at 35% opacity.
 
-#### Diploma Export System *(pending)*
-Dynamic Compose layout generating a localized certificate for the MVP winner containing:
-* Winner's profile data (name, avatar)
-* Event title, date range, location
-* Final standings (top 3)
-* Gala photo (if uploaded, otherwise renders clean without it)
-* Winner can download as PDF/PNG from the Gala screen certificate button (currently a stub).
+**Regular badges (locked state shows actual name + motivational hint):**
+* **🏆 MVP** (`lifetimeMvps`) — "Event champion" / "Win an event to earn this badge"
+* **🔮 Oracle** (`oraclePredictionsCorrect`) — "Predicted the event winner" / motivational hint
+* **🏀 Triple** (`tripleBetsCorrect`) — "Shoot your triple and call the event winner" / hint
+
+**Mystery badges (locked state shows ❓, title `"???"`, mystery description — identity hidden until earned):**
+* **⚡ Reactor** (`reactorWins`) — awarded to participant(s) who gave the most reactions in an event (minimum 20). Ties both win. Revealed as "Reactor — La persona más reactiva del evento" on earn.
+* **🌟 All-Rounder / Jugador Total** (`totalPlayerWins`) — awarded when a participant is both Reactor AND (MVP OR Triple) in the same event. Mystery until earned.
+
+**Easter egg:** tapping the Reactor row 7 times plays `waluigi-sound.mp3` and shows `waluigi_sticker.png` with a stamp spring animation (scale + rotation bounce). Counter resets immediately on trigger. Auto-dismisses after 2.5s or on tap.
+
+Per-event badge records stored at `/users/{userId}/badges/{eventId}` for potential future detailed view.
+
+#### ✅ Automated Prediction & Badge Resolution — Cloud Function (`resolvePredictions`)
+Triggered by `onDocumentUpdated("events/{eventId}")` when `status` transitions to `FINISHED`. Awards all badges atomically via a single Firestore batch:
+* **Oracle**: `projectedMvpId == mvpId` → `stats.oraclePredictionsCorrect++`
+* **Triple**: `tripleParticipantId == mvpId` → `stats.tripleBetsCorrect++`
+* **MVP**: winner → `stats.lifetimeMvps++`
+* **Reactor**: participant(s) with the most reactions given across `points_log`, if ≥ 20 reactions. Ties both win. → `stats.reactorWins++`
+* **All-Rounder**: participant who is Reactor AND (MVP OR Triple) → `stats.totalPlayerWins++`
+* Writes per-event badge record to `/users/{userId}/badges/{eventId}` for all badge earners.
+* Guard against duplicate triggers: exits if `before.status === "FINISHED"`
+* Deployed in `europe-southwest1` alongside `resolveGalaWinner`.
+
+#### ✅ Diploma Export System
+Landscape A4 PDF generated using Android's built-in `PdfDocument` API — no external library. Device language used for all text (EN/ES).
+
+**Layout:** decorative double border (navy outer + gold inner with corner ornaments). Two-line title: "Winner" / "Ganador" (secondary) + event name (bold). Event dates below. Gala photo (if uploaded). Certificate text: "This diploma certifies that [Name] is the MVP of this event". Vote description using a 4-tier system: Unanimous Victory / Overwhelming Victory (≥75%) / Clear Victory (≥50%) / Hard-fought Victory (<50%) — localised in EN and ES. Custom `stamp_winner.png` seal bottom-right.
+
+**Delivery:** saved directly to the device Downloads folder via `MediaStore` (API 29+) or direct file copy (API < 29). System download notification shown after save (tap to open PDF); `POST_NOTIFICATIONS` requested at runtime on API 33+; snackbar fallback if denied.
+
+**Filename:** `mvp_certificate_{EventName}.pdf` — event title sanitised for filesystem safety.
+
+**Access:** "Download Certificate" button in Gala screen, visible to MVP winner only.
 
 ### 🔵 Sprint 5: Hall of Fame & Global Standings
 * **Leaderboard Dashboard:** Aggregate historical leaderboard computing performance points, total lifetime MVPs, and win ratios across all past events.
@@ -193,7 +220,9 @@ Dynamic Compose layout generating a localized certificate for the MVP winner con
   "stats": {
     "lifetimeMvps": "NUMBER",
     "oraclePredictionsCorrect": "NUMBER",
-    "tripleBetsCorrect": "NUMBER"
+    "tripleBetsCorrect": "NUMBER",
+    "reactorWins": "NUMBER",
+    "totalPlayerWins": "NUMBER"
   },
   "createdAt": "TIMESTAMP"
 }

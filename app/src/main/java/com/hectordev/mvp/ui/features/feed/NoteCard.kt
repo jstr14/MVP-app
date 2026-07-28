@@ -43,6 +43,7 @@ import com.hectordev.mvp.R
 import com.hectordev.mvp.domain.NoteType
 import com.hectordev.mvp.domain.TimelineNote
 import com.hectordev.mvp.domain.User
+import com.hectordev.mvp.ui.core.components.FullScreenPhotoViewer
 import com.hectordev.mvp.ui.core.components.TierBadge
 import com.hectordev.mvp.ui.core.components.UserChip
 import java.text.SimpleDateFormat
@@ -64,6 +65,11 @@ internal fun NoteCard(
 ) {
     val author = participants.find { it.id == note.authorId }
     val target = participants.find { it.id == note.targetUserId }
+    var fullScreenUrl by remember { mutableStateOf<String?>(null) }
+
+    fullScreenUrl?.let { url ->
+        FullScreenPhotoViewer(url = url, onDismiss = { fullScreenUrl = null })
+    }
 
     Card(
         modifier = modifier.fillMaxWidth(),
@@ -114,6 +120,7 @@ internal fun NoteCard(
                         .fillMaxWidth()
                         .heightIn(max = 250.dp)
                         .clip(RoundedCornerShape(8.dp))
+                        .clickable { fullScreenUrl = note.contentUrl }
                 )
             } else if (note.type == NoteType.GIF && note.contentUrl != null) {
                 AsyncImage(
@@ -124,6 +131,7 @@ internal fun NoteCard(
                         .fillMaxWidth()
                         .heightIn(max = 300.dp)
                         .clip(RoundedCornerShape(8.dp))
+                        .clickable { fullScreenUrl = note.contentUrl }
                 )
             }
 

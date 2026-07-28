@@ -27,8 +27,12 @@ data class GalaUiState(
     val mvpUser: User? = null,
     val isAdmin: Boolean = false,
     val galaPhotoUrl: String? = null,
+    val eventStartDate: Long = 0L,
+    val eventEndDate: Long = 0L,
     val isSubmittingVote: Boolean = false,
     val isUploadingPhoto: Boolean = false,
+    val isGeneratingCertificate: Boolean = false,
+    val certificateSavedMessage: String? = null,
     val isLoading: Boolean = true,
     val error: String? = null
 )

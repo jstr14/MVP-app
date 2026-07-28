@@ -3,6 +3,7 @@ package com.hectordev.mvp.ui.features.gala
 import android.Manifest
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -69,6 +70,8 @@ fun GalaScreen(
         onSelectCandidate = viewModel::selectCandidate,
         onSubmitVote = viewModel::submitVote,
         onUploadGalaPhoto = viewModel::uploadGalaPhoto,
+        onDownloadCertificate = viewModel::generateCertificate,
+        onClearCertificateSavedMessage = viewModel::clearCertificateSavedMessage,
         onErrorShown = viewModel::clearError,
         modifier = modifier
     )
@@ -84,6 +87,8 @@ internal fun GalaContent(
     onSelectCandidate: (String) -> Unit,
     onSubmitVote: () -> Unit,
     onUploadGalaPhoto: (Uri) -> Unit,
+    onDownloadCertificate: () -> Unit = {},
+    onClearCertificateSavedMessage: () -> Unit = {},
     onErrorShown: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -106,8 +111,31 @@ internal fun GalaContent(
         uri?.let { onUploadGalaPhoto(it) }
     }
 
+    // Requests POST_NOTIFICATIONS on API 33+ then starts the download regardless of result
+    val notificationPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { onDownloadCertificate() }
+
+    fun requestCertificate() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS)
+            != PackageManager.PERMISSION_GRANTED
+        ) {
+            notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+        } else {
+            onDownloadCertificate()
+        }
+    }
+
     LaunchedEffect(uiState.error) {
         uiState.error?.let { snackbarHostState.showSnackbar(it); onErrorShown() }
+    }
+
+    LaunchedEffect(uiState.certificateSavedMessage) {
+        uiState.certificateSavedMessage?.let {
+            snackbarHostState.showSnackbar(context.getString(R.string.diploma_saved_to_downloads))
+            onClearCertificateSavedMessage()
+        }
     }
 
     if (showPhotoSourceDialog) {
@@ -232,7 +260,9 @@ internal fun GalaContent(
                         isWinner = uiState.currentUserId == uiState.mvpId,
                         isUploadingPhoto = uiState.isUploadingPhoto,
                         hasPhoto = uiState.galaPhotoUrl != null,
-                        onTakePhoto = { showPhotoSourceDialog = true }
+                        isGeneratingCertificate = uiState.isGeneratingCertificate,
+                        onTakePhoto = { showPhotoSourceDialog = true },
+                        onDownloadCertificate = { requestCertificate() }
                     )
                 }
             }
