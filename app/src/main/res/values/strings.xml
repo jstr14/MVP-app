@@ -13,6 +13,7 @@
     <!-- Home Feature Strings -->
     <string name="home_welcome_greeting">Welcome back,</string>
     <string name="home_profile_photo_accessibility">Profile photo — tap to open menu</string>
+    <string name="home_menu_badges">Badges</string>
     <string name="home_menu_sign_out">Sign Out</string>
     <string name="home_dashboard_placeholder">Dashboard coming soon</string>
     <string name="home_create_event_fab_accessibility">Create new event</string>
@@ -75,6 +76,39 @@
     <string name="event_details_prediction_triple_pick">Triple: %s</string>
     <string name="event_details_prediction_success">Prediction saved successfully!</string>
     <string name="event_details_live_feed_btn">Live Feed</string>
+
+    <!-- Diploma Strings -->
+    <string name="diploma_winner_label">Winner</string>
+    <string name="diploma_certifies_line1">This diploma certifies that</string>
+    <string name="diploma_certifies_line2">is the MVP of this event</string>
+    <string name="diploma_vote_unanimous">Unanimous Victory</string>
+    <string name="diploma_vote_overwhelming">Overwhelming Victory</string>
+    <string name="diploma_vote_clear">Clear Victory</string>
+    <string name="diploma_vote_hard_fought">Hard-fought Victory</string>
+    <string name="diploma_saved_to_downloads">Certificate saved to Downloads</string>
+    <string name="diploma_notification_title">Certificate downloaded</string>
+    <string name="diploma_notification_tap_to_open">Tap to open</string>
+    <string name="notification_channel_certificates">Certificates</string>
+    <string name="notification_channel_certificates_desc">Notifications when a diploma is saved</string>
+
+    <!-- Badges Screen Strings -->
+    <string name="badges_title">Badges</string>
+    <string name="badges_achievements_title">Achievements</string>
+    <string name="badges_mvp_title">MVP</string>
+    <string name="badges_mvp_description">Event champion</string>
+    <string name="badges_mvp_locked">Win an event to earn this badge</string>
+    <string name="badges_oracle_title">Oracle</string>
+    <string name="badges_oracle_description">Predicted the event winner</string>
+    <string name="badges_oracle_locked">Predict the next event winner to earn this badge</string>
+    <string name="badges_triple_title">Triple</string>
+    <string name="badges_triple_description">Shoot your triple and call the event winner</string>
+    <string name="badges_triple_locked">Shoot your triple and call the event winner to earn this badge</string>
+    <string name="badges_reactor_title">Reactor</string>
+    <string name="badges_reactor_description">The most reactive person in the event</string>
+    <string name="badges_total_player_title">All-Rounder</string>
+    <string name="badges_total_player_description">MVP and Reactor, or Triple and Reactor in the same event</string>
+    <string name="badges_mystery_title">\?\?\?</string>
+    <string name="badges_mystery_description">Participate in more events to discover this badge</string>
 
     <!-- Tier Label Strings (display only — storage keys remain in English) -->
     <string name="tier_fact">Fact</string>

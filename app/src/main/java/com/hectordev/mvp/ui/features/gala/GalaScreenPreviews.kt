@@ -80,6 +80,8 @@ private fun GalaVotingPreview() {
                 onSelectCandidate = {},
                 onSubmitVote = {},
                 onUploadGalaPhoto = {},
+                onDownloadCertificate = {},
+                onClearCertificateSavedMessage = {},
                 onErrorShown = {}
             )
         }
@@ -99,6 +101,8 @@ private fun GalaVotedPreview() {
                 onSelectCandidate = {},
                 onSubmitVote = {},
                 onUploadGalaPhoto = {},
+                onDownloadCertificate = {},
+                onClearCertificateSavedMessage = {},
                 onErrorShown = {}
             )
         }
@@ -118,6 +122,8 @@ private fun GalaCalculatingPreview() {
                 onSelectCandidate = {},
                 onSubmitVote = {},
                 onUploadGalaPhoto = {},
+                onDownloadCertificate = {},
+                onClearCertificateSavedMessage = {},
                 onErrorShown = {}
             )
         }
@@ -137,6 +143,8 @@ private fun GalaFinishedNoPhotoAdminPreview() {
                 onSelectCandidate = {},
                 onSubmitVote = {},
                 onUploadGalaPhoto = {},
+                onDownloadCertificate = {},
+                onClearCertificateSavedMessage = {},
                 onErrorShown = {}
             )
         }
@@ -156,6 +164,8 @@ private fun GalaFinishedWinnerPreview() {
                 onSelectCandidate = {},
                 onSubmitVote = {},
                 onUploadGalaPhoto = {},
+                onDownloadCertificate = {},
+                onClearCertificateSavedMessage = {},
                 onErrorShown = {}
             )
         }
@@ -178,6 +188,8 @@ private fun GalaFinishedWithPhotoPreview() {
                 onSelectCandidate = {},
                 onSubmitVote = {},
                 onUploadGalaPhoto = {},
+                onDownloadCertificate = {},
+                onClearCertificateSavedMessage = {},
                 onErrorShown = {}
             )
         }
@@ -200,6 +212,8 @@ private fun GalaVotingWithVotesPreview() {
                 onSelectCandidate = {},
                 onSubmitVote = {},
                 onUploadGalaPhoto = {},
+                onDownloadCertificate = {},
+                onClearCertificateSavedMessage = {},
                 onErrorShown = {}
             )
         }
@@ -222,6 +236,8 @@ private fun GalaFinishedWithVotesPreview() {
                 onSelectCandidate = {},
                 onSubmitVote = {},
                 onUploadGalaPhoto = {},
+                onDownloadCertificate = {},
+                onClearCertificateSavedMessage = {},
                 onErrorShown = {}
             )
         }

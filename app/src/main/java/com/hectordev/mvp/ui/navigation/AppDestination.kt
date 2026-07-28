@@ -28,4 +28,7 @@ sealed interface AppDestination {
 
     @Serializable
     data class Gala(val eventId: String) : AppDestination
+
+    @Serializable
+    data object Badges : AppDestination
 }

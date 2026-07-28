@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
@@ -72,7 +73,9 @@ internal fun GalaActions(
     isWinner: Boolean,
     isUploadingPhoto: Boolean,
     hasPhoto: Boolean,
-    onTakePhoto: () -> Unit
+    isGeneratingCertificate: Boolean = false,
+    onTakePhoto: () -> Unit,
+    onDownloadCertificate: () -> Unit = {}
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         if (isAdmin) {
@@ -90,9 +93,14 @@ internal fun GalaActions(
         }
         if (isWinner) {
             OutlinedButton(
-                onClick = { /* TODO: diploma export */ },
+                onClick = onDownloadCertificate,
+                enabled = !isGeneratingCertificate,
                 modifier = Modifier.fillMaxWidth()
             ) {
+                if (isGeneratingCertificate) {
+                    CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
+                    Spacer(Modifier.width(8.dp))
+                }
                 Text(stringResource(R.string.gala_download_certificate_btn))
             }
         }

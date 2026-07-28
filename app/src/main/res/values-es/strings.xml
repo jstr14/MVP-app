@@ -13,6 +13,7 @@
     <!-- Home Feature Strings -->
     <string name="home_welcome_greeting">Bienvenido,</string>
     <string name="home_profile_photo_accessibility">Foto de perfil — toca para abrir el menú</string>
+    <string name="home_menu_badges">Logros</string>
     <string name="home_menu_sign_out">Cerrar sesión</string>
     <string name="home_dashboard_placeholder">Panel de control próximamente</string>
     <string name="home_create_event_fab_accessibility">Crear nuevo evento</string>
@@ -75,6 +76,39 @@
     <string name="event_details_prediction_triple_pick">Triple: %s</string>
     <string name="event_details_prediction_success">¡Predicción guardada correctamente!</string>
     <string name="event_details_live_feed_btn">Feed en Directo</string>
+
+    <!-- Diploma Strings -->
+    <string name="diploma_winner_label">Ganador</string>
+    <string name="diploma_certifies_line1">Este diploma certifica que</string>
+    <string name="diploma_certifies_line2">es el MVP de este evento</string>
+    <string name="diploma_vote_unanimous">Victoria Unánime</string>
+    <string name="diploma_vote_overwhelming">Victoria Aplastante</string>
+    <string name="diploma_vote_clear">Victoria Clara</string>
+    <string name="diploma_vote_hard_fought">Victoria Reñida</string>
+    <string name="diploma_saved_to_downloads">Certificado guardado en Descargas</string>
+    <string name="diploma_notification_title">Certificado descargado</string>
+    <string name="diploma_notification_tap_to_open">Toca para abrir</string>
+    <string name="notification_channel_certificates">Certificados</string>
+    <string name="notification_channel_certificates_desc">Notificaciones cuando se guarda un diploma</string>
+
+    <!-- Badges Screen Strings -->
+    <string name="badges_title">Logros</string>
+    <string name="badges_achievements_title">Logros</string>
+    <string name="badges_mvp_title">MVP</string>
+    <string name="badges_mvp_description">Campeón del evento</string>
+    <string name="badges_mvp_locked">Gana un evento para conseguir este logro</string>
+    <string name="badges_oracle_title">Oráculo</string>
+    <string name="badges_oracle_description">Predijiste al ganador del evento</string>
+    <string name="badges_oracle_locked">Predice al ganador del próximo evento para conseguir este logro</string>
+    <string name="badges_triple_title">Triple</string>
+    <string name="badges_triple_description">Te tiraste el Triple y acertaste el ganador del evento</string>
+    <string name="badges_triple_locked">Haz una predicción Triple que coincida con el ganador para conseguir este logro</string>
+    <string name="badges_reactor_title">Reactor</string>
+    <string name="badges_reactor_description">La persona más reactiva del evento</string>
+    <string name="badges_total_player_title">Jugador Total</string>
+    <string name="badges_total_player_description">MVP y Reactor, o Triple y Reactor en el mismo evento</string>
+    <string name="badges_mystery_title">\?\?\?</string>
+    <string name="badges_mystery_description">Participa en más eventos para descubrir este logro</string>
 
     <!-- Tier Label Strings (display only — storage keys remain in English) -->
     <string name="tier_fact">Facto</string>

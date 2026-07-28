@@ -6,6 +6,7 @@ import com.hectordev.mvp.data.domain.UserDataModel
 import com.hectordev.mvp.data.mapper.toDataModel
 import com.hectordev.mvp.data.mapper.toDomain
 import com.hectordev.mvp.domain.User
+import com.hectordev.mvp.domain.UserStats
 import com.hectordev.mvp.domain.repository.UserRepository
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -60,6 +61,22 @@ class UserRepositoryDefault @Inject constructor(
             .firstOrNull()
             ?.toObject(UserDataModel::class.java)
             ?.toDomain()
+    }
+
+    override fun observeUserStats(userId: String): Flow<UserStats> = callbackFlow {
+        val subscription = usersCollection.document(userId)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) { close(error); return@addSnapshotListener }
+                val stats = snapshot?.get("stats") as? Map<*, *>
+                trySend(UserStats(
+                    lifetimeMvps = (stats?.get("lifetimeMvps") as? Long)?.toInt() ?: 0,
+                    oracleWins = (stats?.get("oraclePredictionsCorrect") as? Long)?.toInt() ?: 0,
+                    tripleWins = (stats?.get("tripleBetsCorrect") as? Long)?.toInt() ?: 0,
+                    reactorWins = (stats?.get("reactorWins") as? Long)?.toInt() ?: 0,
+                    totalPlayerWins = (stats?.get("totalPlayerWins") as? Long)?.toInt() ?: 0
+                ))
+            }
+        awaitClose { subscription.remove() }
     }
 
     override fun getAllUsers(): Flow<List<User>> = callbackFlow {

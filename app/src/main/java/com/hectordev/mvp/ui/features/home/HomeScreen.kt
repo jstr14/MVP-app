@@ -55,6 +55,7 @@ fun HomeScreen(
     modifier: Modifier = Modifier,
     onLogout: () -> Unit,
     onCreateEvent: () -> Unit,
+    onNavigateToBadges: () -> Unit = {},
     onEventClick: (eventId: String, status: EventStatus) -> Unit = { _, _ -> },
     showEventCreatedMessage: Boolean = false,
     onEventCreatedMessageShown: () -> Unit = {},
@@ -69,6 +70,7 @@ fun HomeScreen(
         onEventCreatedMessageShown = onEventCreatedMessageShown,
         onLogout = onLogout,
         onCreateEvent = onCreateEvent,
+        onNavigateToBadges = onNavigateToBadges,
         onEventClick = onEventClick,
         onDeleteActiveEvent = viewModel::deleteActiveEvent,
         onAcceptInvitation = viewModel::acceptInvitation,
@@ -93,6 +95,7 @@ private fun HomeScreenContent(
     onEventCreatedMessageShown: () -> Unit = {},
     onLogout: () -> Unit,
     onCreateEvent: () -> Unit,
+    onNavigateToBadges: () -> Unit = {},
     onEventClick: (eventId: String, status: EventStatus) -> Unit = { _, _ -> },
     onDeleteActiveEvent: () -> Unit,
     onAcceptInvitation: (String) -> Unit = {},
@@ -208,6 +211,10 @@ private fun HomeScreenContent(
                             expanded = menuExpanded,
                             onDismissRequest = { menuExpanded = false }
                         ) {
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.home_menu_badges)) },
+                                onClick = { menuExpanded = false; onNavigateToBadges() }
+                            )
                             DropdownMenuItem(
                                 text = { Text(stringResource(R.string.home_menu_sign_out)) },
                                 onClick = { menuExpanded = false; onLogout() }

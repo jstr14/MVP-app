@@ -6,6 +6,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.google.firebase.auth.FirebaseAuth
+import com.hectordev.mvp.domain.DiplomaData
+import com.hectordev.mvp.domain.repository.DiplomaRepository
 import com.hectordev.mvp.domain.TimelineNote
 import com.hectordev.mvp.domain.User
 import com.hectordev.mvp.domain.Prediction
@@ -26,6 +28,7 @@ class GalaViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val eventsRepository: EventsRepository,
     private val userRepository: UserRepository,
+    private val diplomaRepository: DiplomaRepository,
     firebaseAuth: FirebaseAuth
 ) : ViewModel() {
 
@@ -84,6 +87,8 @@ class GalaViewModel @Inject constructor(
                             mvpUser = mvpUser,
                             isAdmin = event?.adminId == currentUserId,
                             galaPhotoUrl = event?.galaPhotoUrl,
+                            eventStartDate = event?.startDate ?: 0L,
+                            eventEndDate = event?.endDate ?: 0L,
                             isLoading = false
                         )
                     }
@@ -143,6 +148,37 @@ class GalaViewModel @Inject constructor(
                 _uiState.update { it.copy(isUploadingPhoto = false, error = e.localizedMessage) }
             }
         }
+    }
+
+    fun generateCertificate() {
+        val state = _uiState.value
+        val winner = state.mvpUser ?: return
+        viewModelScope.launch {
+            _uiState.update { it.copy(isGeneratingCertificate = true) }
+            try {
+                val standings = state.topStandings.map { s -> Pair(s.name, s.totalScore) }
+                val fileName = diplomaRepository.generateAndSave(
+                    DiplomaData(
+                        eventId = eventId,
+                        eventTitle = state.eventTitle,
+                        startDate = state.eventStartDate,
+                        endDate = state.eventEndDate,
+                        winnerName = winner.name,
+                        winnerId = state.mvpId ?: "",
+                        standings = standings,
+                        galaPhotoUrl = state.galaPhotoUrl,
+                        totalParticipants = state.totalParticipants
+                    )
+                )
+                _uiState.update { it.copy(isGeneratingCertificate = false, certificateSavedMessage = fileName) }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(isGeneratingCertificate = false, error = e.localizedMessage) }
+            }
+        }
+    }
+
+    fun clearCertificateSavedMessage() {
+        _uiState.update { it.copy(certificateSavedMessage = null) }
     }
 
     fun clearError() {
