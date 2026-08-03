@@ -1,0 +1,146 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Helpers ──────────────────────────────────────────────────────────────
+
+    function uid() {
+      return request.auth.uid;
+    }
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function eventData(eventId) {
+      return get(/databases/$(database)/documents/events/$(eventId)).data;
+    }
+
+    function isParticipant(eventId) {
+      return uid() in eventData(eventId).participants;
+    }
+
+    function isAdmin(eventId) {
+      return eventData(eventId).adminId == uid();
+    }
+
+    function isStatus(eventId, status) {
+      return eventData(eventId).status == status;
+    }
+
+    // ── /users/{userId} ───────────────────────────────────────────────────────
+    // Any authenticated user can look up other users (needed for invite-by-email
+    // search and participant name/avatar resolution across the app).
+    // Only the user themselves can write their own document.
+
+    match /users/{userId} {
+      allow read:   if isAuthenticated();
+      allow create: if isAuthenticated() && uid() == userId;
+      allow update: if isAuthenticated() && uid() == userId;
+      allow delete: if false;
+
+      // Badge records written exclusively by Cloud Functions (Admin SDK bypasses
+      // these rules), so client write is blocked.
+      match /badges/{eventId} {
+        allow read:  if isAuthenticated();
+        allow write: if false;
+      }
+    }
+
+    // ── /events/{eventId} ────────────────────────────────────────────────────
+
+    match /events/{eventId} {
+
+      // Confirmed participants and pending invitees can read the event.
+      allow read: if isAuthenticated() && (
+        uid() in resource.data.participants ||
+        uid() in resource.data.pendingParticipants
+      );
+
+      // Any authenticated user can create an event; they must set themselves as
+      // admin and be the first participant.
+      allow create: if isAuthenticated() &&
+        request.resource.data.adminId == uid() &&
+        uid() in request.resource.data.participants;
+
+      // Confirmed participants and pending invitees can update the event document
+      // (status transitions, invite acceptance, emergency triggers, etc.).
+      // Field-level enforcement is handled app-side; Cloud Functions use Admin SDK.
+      allow update: if isAuthenticated() && (
+        uid() in resource.data.participants ||
+        uid() in resource.data.pendingParticipants
+      );
+
+      // Only the admin can delete an event.
+      allow delete: if isAuthenticated() && resource.data.adminId == uid();
+
+      // ── /predictions/{userId} ──────────────────────────────────────────────
+      // Hidden from others until the gala (VOTING_PHASE / FINISHED).
+
+      match /predictions/{predictionUserId} {
+        allow read: if isAuthenticated() && isParticipant(eventId) && (
+          uid() == predictionUserId ||
+          eventData(eventId).status in ["VOTING_PHASE", "FINISHED"]
+        );
+        allow create, update: if isAuthenticated() &&
+          uid() == predictionUserId &&
+          isParticipant(eventId) &&
+          isStatus(eventId, "PREDICTION");
+        allow delete: if false;
+      }
+
+      // ── /points_log/{logId} ───────────────────────────────────────────────
+      // Timeline notes and scores. Reactions use update; deletion limited to
+      // admin and the note's own author.
+
+      match /points_log/{logId} {
+        allow read: if isAuthenticated() && isParticipant(eventId);
+
+        allow create: if isAuthenticated() &&
+          isParticipant(eventId) &&
+          isStatus(eventId, "ON_GOING") &&
+          request.resource.data.authorId == uid() &&
+          request.resource.data.targetUserId != uid(); // no self-targeting
+
+        allow update: if isAuthenticated() && isParticipant(eventId); // reactions
+
+        allow delete: if isAuthenticated() && isParticipant(eventId) && (
+          isAdmin(eventId) || resource.data.authorId == uid()
+        );
+      }
+
+      // ── /final_votes/{voterId} ────────────────────────────────────────────
+      // Blind ballot for the gala. Each participant submits exactly one vote.
+
+      match /final_votes/{voterId} {
+        allow read: if isAuthenticated() && isParticipant(eventId);
+        allow create, update: if isAuthenticated() &&
+          uid() == voterId &&
+          isParticipant(eventId) &&
+          isStatus(eventId, "VOTING_PHASE");
+        allow delete: if false;
+      }
+
+      // ── /emergency_requests/{requestId} ──────────────────────────────────
+      // Emergency Clause. Any participant can trigger one (create) or vote on
+      // the active one (update). Resolution writes come from Cloud Functions.
+
+      match /emergency_requests/{requestId} {
+        allow read: if isAuthenticated() && isParticipant(eventId);
+
+        allow create: if isAuthenticated() &&
+          isParticipant(eventId) &&
+          isStatus(eventId, "ON_GOING") &&
+          request.resource.data.triggeredById == uid() &&
+          request.resource.data.status == "PENDING";
+
+        // Allow vote updates only while the request is still pending.
+        allow update: if isAuthenticated() &&
+          isParticipant(eventId) &&
+          resource.data.status == "PENDING";
+
+        allow delete: if false;
+      }
+    }
+  }
+}
