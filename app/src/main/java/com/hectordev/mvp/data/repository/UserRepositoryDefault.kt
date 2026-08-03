@@ -79,6 +79,10 @@ class UserRepositoryDefault @Inject constructor(
         awaitClose { subscription.remove() }
     }
 
+    override suspend fun saveFcmToken(userId: String, token: String) {
+        usersCollection.document(userId).update("fcmToken", token).await()
+    }
+
     override fun getAllUsers(): Flow<List<User>> = callbackFlow {
         val subscription = usersCollection.addSnapshotListener { snapshot, error ->
             if (error != null) {

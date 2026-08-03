@@ -13,6 +13,7 @@ import coil.decode.GifDecoder
 import coil.decode.ImageDecoderDecoder
 import com.giphy.sdk.ui.Giphy
 import dagger.hilt.android.HiltAndroidApp
+import androidx.core.net.toUri
 
 @HiltAndroidApp
 class MVPApplication : Application() {
@@ -32,26 +33,47 @@ class MVPApplication : Application() {
     }
 
     private fun createNotificationChannels() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val soundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+        if (SDK_INT >= Build.VERSION_CODES.O) {
+            val notificationManager = getSystemService(NotificationManager::class.java)
             val audioAttributes = AudioAttributes.Builder()
                 .setUsage(AudioAttributes.USAGE_NOTIFICATION)
                 .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
                 .build()
-            val channel = NotificationChannel(
+
+            val certChannel = NotificationChannel(
                 CHANNEL_CERTIFICATES,
                 getString(R.string.notification_channel_certificates),
                 NotificationManager.IMPORTANCE_HIGH
             ).apply {
                 description = getString(R.string.notification_channel_certificates_desc)
-                setSound(soundUri, audioAttributes)
+                setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION), audioAttributes)
                 enableVibration(true)
             }
-            getSystemService(NotificationManager::class.java).createNotificationChannel(channel)
+
+            val alarmAttributes = AudioAttributes.Builder()
+                .setUsage(AudioAttributes.USAGE_ALARM)
+                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                .build()
+            val nuclearAlarmUri = "android.resource://$packageName/${R.raw.nuclear_alarm}".toUri()
+            val emergencyChannel = NotificationChannel(
+                CHANNEL_EMERGENCY,
+                getString(R.string.notification_channel_emergency),
+                NotificationManager.IMPORTANCE_HIGH
+            ).apply {
+                description = getString(R.string.notification_channel_emergency_desc)
+                setSound(nuclearAlarmUri, alarmAttributes)
+                enableVibration(true)
+                vibrationPattern = longArrayOf(0, 400, 200, 400, 200, 400)
+            }
+
+            notificationManager.createNotificationChannel(certChannel)
+            notificationManager.createNotificationChannel(emergencyChannel)
         }
     }
 
     companion object {
         const val CHANNEL_CERTIFICATES = "mvp_certificates"
+        const val CHANNEL_EMERGENCY = "mvp_emergency"
+        const val NOTIFICATION_ID_EMERGENCY = 1001
     }
 }

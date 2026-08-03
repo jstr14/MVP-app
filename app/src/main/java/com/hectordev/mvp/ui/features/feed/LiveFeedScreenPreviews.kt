@@ -80,7 +80,9 @@ private fun LiveFeedWithNotesAdminPreview() {
                 onPostSuccessConsumed = {},
                 onDeleteNote = {},
                 onToggleReaction = { _, _ -> },
-                onErrorShown = {}
+                onErrorShown = {},
+                onTriggerEmergency = {},
+                onCastEmergencyVote = {}
             )
         }
     }
@@ -110,7 +112,9 @@ private fun LiveFeedWithNotesParticipantPreview() {
                 onPostSuccessConsumed = {},
                 onDeleteNote = {},
                 onToggleReaction = { _, _ -> },
-                onErrorShown = {}
+                onErrorShown = {},
+                onTriggerEmergency = {},
+                onCastEmergencyVote = {}
             )
         }
     }
@@ -140,7 +144,9 @@ private fun LiveFeedEmptyPreview() {
                 onPostSuccessConsumed = {},
                 onDeleteNote = {},
                 onToggleReaction = { _, _ -> },
-                onErrorShown = {}
+                onErrorShown = {},
+                onTriggerEmergency = {},
+                onCastEmergencyVote = {}
             )
         }
     }

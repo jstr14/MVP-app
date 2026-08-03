@@ -11,6 +11,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.firebase.auth.GoogleAuthProvider
+import com.google.firebase.messaging.FirebaseMessaging
 import com.hectordev.mvp.BuildConfig
 import com.hectordev.mvp.domain.User
 import com.hectordev.mvp.domain.repository.EventsRepository
@@ -108,6 +109,10 @@ class AuthViewModel @Inject constructor(
                         )
                         if (email.isNotEmpty()) {
                             runCatching { eventsRepository.bindPendingEmailInvite(email, firebaseUser.uid) }
+                        }
+                        runCatching {
+                            val token = FirebaseMessaging.getInstance().token.await()
+                            userRepository.saveFcmToken(firebaseUser.uid, token)
                         }
                         // Success path: update session states and trigger UI navigation
                         _isUserLoggedIn.value = true

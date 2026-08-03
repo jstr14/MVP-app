@@ -1,6 +1,7 @@
 import { onDocumentCreated, onDocumentUpdated } from "firebase-functions/v2/firestore";
 import { initializeApp } from "firebase-admin/app";
 import { getFirestore, FieldValue } from "firebase-admin/firestore";
+import { getMessaging } from "firebase-admin/messaging";
 
 initializeApp();
 
@@ -247,3 +248,137 @@ async function finish(
     status: "FINISHED",
   });
 }
+
+/**
+ * Fires when a new emergency_request document is created.
+ * Sends an FCM push notification (alarm sound channel) to all participants
+ * except the triggerer.
+ */
+export const notifyEmergency = onDocumentCreated(
+  {
+    document: "events/{eventId}/emergency_requests/{requestId}",
+    region: "europe-southwest1",
+  },
+  async (event) => {
+    const { eventId } = event.params;
+    const data = event.data?.data();
+    if (!data) return;
+
+    const triggeredById = data.triggeredById as string;
+
+    const eventDoc = await db.collection("events").doc(eventId).get();
+    const eventData = eventDoc.data();
+    if (!eventData) return;
+
+    const participants: string[] = eventData.participants ?? [];
+    const otherParticipants = participants.filter((id) => id !== triggeredById);
+    if (otherParticipants.length === 0) return;
+
+    const triggererDoc = await db.collection("users").doc(triggeredById).get();
+    const triggererName = (triggererDoc.data()?.name as string | undefined) ?? "A participant";
+
+    const userDocs = await Promise.all(
+      otherParticipants.map((uid) => db.collection("users").doc(uid).get())
+    );
+    const tokens: string[] = userDocs
+      .map((doc) => doc.data()?.fcmToken as string | undefined)
+      .filter((t): t is string => !!t);
+
+    if (tokens.length === 0) return;
+
+    const messaging = getMessaging();
+    await Promise.all(
+      tokens.map((token) =>
+        messaging.send({
+          token,
+          data: {
+            type: "emergency",
+            eventId,
+            triggeredById,
+            targetUserId: data.targetUserId as string,
+            triggererName,
+          },
+          android: { priority: "high" },
+        })
+      )
+    );
+  }
+);
+
+/**
+ * Fires when an emergency_request document is updated (votes added).
+ * Resolves the emergency when:
+ * - Accept votes reach absolute majority → APPROVED_SHUTDOWN (event ends immediately)
+ * - All participants voted with no majority → REJECTED
+ * Client-side handles TIMED_OUT when countdown expires.
+ */
+export const resolveEmergency = onDocumentUpdated(
+  {
+    document: "events/{eventId}/emergency_requests/{requestId}",
+    region: "europe-southwest1",
+  },
+  async (event) => {
+    const before = event.data?.before.data();
+    const after = event.data?.after.data();
+    if (!before || !after) return;
+    if (after.status !== "PENDING") return;
+
+    const { eventId, requestId } = event.params;
+    const triggeredById = after.triggeredById as string;
+    const targetUserId = after.targetUserId as string;
+    const votesAccept: string[] = after.votesAccept ?? [];
+    const votesDecline: string[] = after.votesDecline ?? [];
+
+    const eventDoc = await db.collection("events").doc(eventId).get();
+    const eventData = eventDoc.data();
+    if (!eventData) return;
+
+    const totalParticipants: number = (eventData.participants as string[]).length;
+    const majority = Math.ceil(totalParticipants / 2);
+
+    const requestRef = db
+      .collection("events")
+      .doc(eventId)
+      .collection("emergency_requests")
+      .doc(requestId);
+    const eventRef = db.collection("events").doc(eventId);
+
+    if (votesAccept.length >= majority) {
+      // Approved — end event immediately with +1000 pts entry
+      const batch = db.batch();
+      const logRef = db
+        .collection("events")
+        .doc(eventId)
+        .collection("points_log")
+        .doc();
+      batch.set(logRef, {
+        id: logRef.id,
+        authorId: "system",
+        targetUserId,
+        type: "TEXT",
+        textContent: "Emergency Clause Approved",
+        tierLabel: "Emergency",
+        pointsAwarded: 1000,
+        timestamp: Date.now(),
+        reactions: {},
+      });
+      batch.update(requestRef, { status: "APPROVED_SHUTDOWN" });
+      batch.update(eventRef, {
+        mvpId: targetUserId,
+        status: "FINISHED",
+        activeEmergencyId: null,
+        usedEmergencyClause: FieldValue.arrayUnion(triggeredById),
+      });
+      await batch.commit();
+    } else if (votesAccept.length + votesDecline.length >= totalParticipants) {
+      // All voted, no majority → REJECTED
+      const batch = db.batch();
+      batch.update(requestRef, { status: "REJECTED" });
+      batch.update(eventRef, {
+        activeEmergencyId: null,
+        usedEmergencyClause: FieldValue.arrayUnion(triggeredById),
+      });
+      await batch.commit();
+    }
+  }
+);

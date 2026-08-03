@@ -200,9 +200,26 @@ Landscape A4 PDF generated using Android's built-in `PdfDocument` API — no ext
 **Access:** "Download Certificate" button in Gala screen, visible to MVP winner only.
 
 ### 🔵 Sprint 5: Hall of Fame & Global Standings
-* **Leaderboard Dashboard:** Aggregate historical leaderboard computing performance points, total lifetime MVPs, and win ratios across all past events.
-* **User Profile File:** Personalized profiles providing rapid review and re-download capability for all unlocked digital diplomas.
-* **Archive Viewer Mode:** Past events can be opened by any participant in a read-only viewer mode, maintaining full access to the live timeline texts, photos, and historical graphs.
+
+* ✅ **Archive Viewer Mode:** Past events accessible in read-only mode via the Live Feed viewer (`viewerMode = true`) launched from the Gala screen. Full timeline, photos and GIFs viewable; `FullScreenPhotoViewer` available on tap.
+* ✅ **User Profile:** Badges screen implemented in Sprint 4 — shows all 5 achievement types with earned/locked states and per-event records stored for future use. No further profile data planned at this stage.
+* **Leaderboard Dashboard:** *(deferred — future development)* Aggregate historical leaderboard computing lifetime MVPs, win ratios and top performers across all past events.
+
+### 🟣 Sprint 6: App Icon & UI/UX Polish
+
+#### App Icon
+* Custom adaptive icon (foreground + background layers) for Android 8+ using the `mipmap-anydpi-v26` format.
+* Legacy icon for Android < 8 in all density buckets (`mipmap-mdpi` through `mipmap-xxxhdpi`).
+* Notification icon (monochrome, used in status bar and notification drawer).
+
+#### UI/UX Improvements *(scope TBD)*
+* **Loading states** — skeleton screens or shimmer placeholders for lists and card sections that currently show a spinner.
+* **Empty states** — illustrated or branded empty state views for sections with no data (no events, no past events, no notes in feed, etc.).
+* **Transitions & animations** — screen enter/exit transitions, shared element transitions where relevant.
+* **Error states** — user-friendly error screens with retry actions instead of raw snackbar messages.
+* **Haptic feedback** — light haptic on key interactions (vote cast, reaction added, easter egg, etc.).
+* **Accessibility** — content descriptions audit, minimum touch target sizes, color contrast review.
+* **Typography & spacing** — visual consistency pass across all screens.
 
 ---
 

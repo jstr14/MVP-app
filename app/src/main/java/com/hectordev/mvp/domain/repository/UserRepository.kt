@@ -11,4 +11,5 @@ interface UserRepository {
     suspend fun getUserByEmail(email: String): User?
     fun getAllUsers(): Flow<List<User>>
     fun observeUserStats(userId: String): Flow<UserStats>
+    suspend fun saveFcmToken(userId: String, token: String)
 }

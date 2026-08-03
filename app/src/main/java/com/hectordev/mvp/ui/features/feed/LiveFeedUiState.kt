@@ -1,5 +1,6 @@
 package com.hectordev.mvp.ui.features.feed
 
+import com.hectordev.mvp.domain.EmergencyRequest
 import com.hectordev.mvp.domain.TimelineNote
 import com.hectordev.mvp.domain.User
 
@@ -13,5 +14,11 @@ data class LiveFeedUiState(
     val postSuccess: Boolean = false,
     val navigateToGala: Boolean = false,
     val isLoading: Boolean = true,
-    val error: String? = null
+    val error: String? = null,
+    // Emergency clause
+    val hasUsedEmergency: Boolean = false,
+    val activeEmergencyId: String? = null,
+    val emergencyRequest: EmergencyRequest? = null,
+    val emergencyCountdownSeconds: Int = 0,
+    val totalParticipants: Int = 0
 )

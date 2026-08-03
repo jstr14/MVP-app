@@ -197,4 +197,32 @@
     <string name="create_event_btn">Crear evento</string>
     <string name="create_event_date_picker_ok">Aceptar</string>
     <string name="create_event_date_picker_cancel">Cancelar</string>
+
+    <!-- Emergency Clause Strings -->
+    <string name="emergency_btn_accessibility">Servicios básicos</string>
+    <string name="emergency_sheet_title">Servicios básicos</string>
+    <string name="emergency_sheet_description">Selecciona quien necesita o ha necesitado servicios básicos. Si la mayoría aprueba, el evento termina inmediatamente. Esta acción es de un solo uso.</string>
+    <string name="emergency_confirm_title">¿Activar Servicios básicos?</string>
+    <string name="emergency_confirm_message">Esta acción es de un solo uso. Si la mayoría aprueba, el evento terminará inmediatamente con %s como MVP.</string>
+    <string name="emergency_confirm_btn">Activar</string>
+    <string name="emergency_overlay_triggered_by">Emergencia activada por %s</string>
+    <string name="emergency_overlay_target">Nominando a %s como MVP</string>
+    <string name="emergency_overlay_accept">Aceptar</string>
+    <string name="emergency_overlay_decline">Rechazar</string>
+    <string name="emergency_overlay_waiting">Esperando el voto del grupo…</string>
+    <string name="emergency_overlay_votes_accept">✓ %d aceptan</string>
+    <string name="emergency_overlay_votes_decline">✗ %d rechazan</string>
+    <string name="emergency_overlay_call_112">Llamar al 112</string>
+    <string name="emergency_overlay_time_remaining">%s restante</string>
+    <string name="emergency_overlay_voted_accept">Has votado: Aceptar</string>
+    <string name="emergency_overlay_voted_decline">Has votado: Rechazar</string>
+    <string name="emergency_overlay_approved">Emergencia aprobada — terminando el evento</string>
+    <string name="emergency_overlay_rejected">Emergencia rechazada — el evento continúa</string>
+    <string name="emergency_overlay_timed_out">Tiempo agotado — el evento continúa</string>
+    <string name="notification_channel_emergency">Alertas de emergencia</string>
+    <string name="notification_channel_emergency_desc">Notificaciones cuando se activan los Servicios básicos</string>
+    <string name="emergency_notification_title">&#128680; Servicios básicos activado</string>
+    <string name="emergency_notification_body">%s ha activado Servicios básicos</string>
+    <string name="emergency_notification_unknown">Un participante</string>
 </resources>
+

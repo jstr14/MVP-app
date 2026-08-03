@@ -197,4 +197,31 @@
     <string name="create_event_btn">Create Event</string>
     <string name="create_event_date_picker_ok">OK</string>
     <string name="create_event_date_picker_cancel">Cancel</string>
+
+    <!-- Emergency Clause Strings -->
+    <string name="emergency_btn_accessibility">Emergency Clause</string>
+    <string name="emergency_sheet_title">Emergency Clause</string>
+    <string name="emergency_sheet_description">Select who you want to nominate as MVP. If the majority approves, the event ends immediately. This is a one-time action.</string>
+    <string name="emergency_confirm_title">Trigger Emergency Clause?</string>
+    <string name="emergency_confirm_message">This is a one-time action. If the majority approves, the event will end immediately with %s as the MVP.</string>
+    <string name="emergency_confirm_btn">Trigger</string>
+    <string name="emergency_overlay_triggered_by">Emergency triggered by %s</string>
+    <string name="emergency_overlay_target">Nominating %s as MVP</string>
+    <string name="emergency_overlay_accept">Accept</string>
+    <string name="emergency_overlay_decline">Decline</string>
+    <string name="emergency_overlay_waiting">Waiting for the group to vote…</string>
+    <string name="emergency_overlay_votes_accept">✓ %d accept</string>
+    <string name="emergency_overlay_votes_decline">✗ %d decline</string>
+    <string name="emergency_overlay_call_112">Call 112</string>
+    <string name="emergency_overlay_time_remaining">%s remaining</string>
+    <string name="emergency_overlay_voted_accept">You voted: Accept</string>
+    <string name="emergency_overlay_voted_decline">You voted: Decline</string>
+    <string name="emergency_overlay_approved">Emergency approved — ending event</string>
+    <string name="emergency_overlay_rejected">Emergency rejected — event continues</string>
+    <string name="emergency_overlay_timed_out">Time\'s up — event continues</string>
+    <string name="notification_channel_emergency">Emergency Alerts</string>
+    <string name="notification_channel_emergency_desc">Notifications when an Emergency Clause is triggered</string>
+    <string name="emergency_notification_title">&#128680; Emergency Clause Activated</string>
+    <string name="emergency_notification_body">%s has triggered an emergency clause</string>
+    <string name="emergency_notification_unknown">A participant</string>
 </resources>
